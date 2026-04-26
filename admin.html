@@ -1,0 +1,1255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin — Luggage Requests | Niseko Cluster</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --snow: #f7f5f2;
+      --ink: #1a1a1a;
+      --pine: #2c4a3e;
+      --pine-light: #3d6b5a;
+      --gold: #c4a96b;
+      --mist: #e8e4de;
+      --fog: #d4cfc8;
+      --white: #ffffff;
+      --danger: #c0392b;
+      --danger-bg: #fdf2f2;
+      --badge-hilton: #1a3a6b;
+      --badge-hinode: #7a4e2d;
+      --badge-green: #2c4a3e;
+    }
+
+    body { font-family: 'Jost', sans-serif; background: var(--snow); color: var(--ink); min-height: 100vh; }
+
+    /* ═══════════════════════════════════
+       LOGIN SCREEN
+    ═══════════════════════════════════ */
+    #loginScreen {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(150deg, #1e3530 0%, #2c4a3e 50%, #3d6b5a 100%);
+      padding: 1.5rem;
+    }
+
+    .login-card {
+      background: var(--white);
+      border-radius: 4px;
+      width: 100%;
+      max-width: 380px;
+      overflow: hidden;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.3);
+      animation: fadeUp 0.4s ease both;
+    }
+
+    .login-header {
+      background: var(--pine);
+      padding: 2rem 2rem 1.6rem;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .login-logo {
+      width: 48px; height: 48px;
+      background: rgba(196,169,107,0.15);
+      border: 1px solid rgba(196,169,107,0.3);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    .login-logo svg { color: var(--gold); width: 22px; height: 22px; }
+
+    .login-header h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.5rem;
+      font-weight: 400;
+      color: var(--white);
+      letter-spacing: 0.04em;
+    }
+
+    .login-header p {
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.4);
+    }
+
+    .login-body { padding: 2rem; }
+
+    .login-field { display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 1.1rem; }
+
+    .login-field label {
+      font-size: 0.7rem; font-weight: 600;
+      letter-spacing: 0.12em; text-transform: uppercase; color: #777;
+    }
+
+    .login-input-wrap { position: relative; }
+
+    .login-input-wrap svg {
+      position: absolute; left: 0.8rem; top: 50%; transform: translateY(-50%);
+      width: 15px; height: 15px; color: var(--fog); pointer-events: none;
+      transition: color 0.2s;
+    }
+
+    .login-input-wrap input {
+      width: 100%;
+      padding: 0.72rem 0.85rem 0.72rem 2.4rem;
+      border: 1.5px solid var(--mist);
+      border-radius: 3px;
+      font-family: 'Jost', sans-serif;
+      font-size: 0.9rem; font-weight: 300;
+      background: var(--snow); color: var(--ink);
+      outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .login-input-wrap input:focus {
+      border-color: var(--pine-light);
+      box-shadow: 0 0 0 3px rgba(61,107,90,0.08);
+      background: var(--white);
+    }
+
+    .login-input-wrap:focus-within svg { color: var(--pine-light); }
+
+    .login-error {
+      font-size: 0.75rem; color: var(--danger);
+      background: var(--danger-bg);
+      border: 1px solid rgba(192,57,43,0.15);
+      border-radius: 3px;
+      padding: 0.55rem 0.8rem;
+      margin-bottom: 1rem;
+      display: none;
+    }
+
+    .login-error.show { display: block; }
+
+    .btn-login {
+      width: 100%;
+      padding: 0.85rem;
+      background: var(--pine);
+      color: var(--white);
+      border: none; border-radius: 3px;
+      font-family: 'Jost', sans-serif;
+      font-size: 0.82rem; font-weight: 500;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      cursor: pointer; transition: background 0.2s, transform 0.15s;
+      display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+    }
+
+    .btn-login:hover { background: var(--pine-light); }
+    .btn-login:active { transform: scale(0.99); }
+    .btn-login svg { width: 15px; height: 15px; }
+
+    .login-footer {
+      text-align: center;
+      padding: 1rem 2rem 1.5rem;
+      font-size: 0.7rem;
+      color: #bbb;
+      letter-spacing: 0.05em;
+    }
+
+    /* ═══════════════════════════════════
+       ADMIN APP
+    ═══════════════════════════════════ */
+    #adminApp { display: none; }
+    #adminApp.show { display: block; }
+
+    /* TOPBAR */
+    .topbar {
+      background: var(--pine); padding: 0 2rem; height: 60px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 100;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+    }
+    .topbar-left { display: flex; align-items: center; gap: 0.9rem; }
+    .topbar-left svg { color: var(--gold); }
+    .topbar-title { font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; font-weight: 400; color: var(--white); letter-spacing: 0.04em; }
+    .topbar-title span { font-family: 'Jost', sans-serif; font-size: 0.68rem; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(255,255,255,0.45); margin-left: 0.5rem; }
+    .topbar-right { display: flex; align-items: center; gap: 0.75rem; }
+
+    .btn-small {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      padding: 0.45rem 1rem;
+      font-family: 'Jost', sans-serif; font-size: 0.73rem; font-weight: 500;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      border-radius: 3px; cursor: pointer; transition: all 0.2s; border: none;
+    }
+    .btn-small svg { width: 13px; height: 13px; }
+    .btn-export { background: rgba(196,169,107,0.15); color: var(--gold); border: 1px solid rgba(196,169,107,0.3); }
+    .btn-export:hover { background: rgba(196,169,107,0.25); }
+    .btn-logout { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.65); border: 1px solid rgba(255,255,255,0.12); }
+    .btn-logout:hover { background: rgba(255,255,255,0.15); color: var(--white); }
+
+    /* CONTAINER */
+    .container { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+
+    /* STATS */
+    .stats-bar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2rem; }
+    .stat-card { background: var(--white); border: 1px solid var(--mist); border-radius: 4px; padding: 1.1rem 1.3rem; display: flex; flex-direction: column; gap: 0.3rem; }
+    .stat-label { font-size: 0.68rem; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; color: #999; }
+    .stat-value { font-family: 'Cormorant Garamond', serif; font-size: 2rem; font-weight: 500; color: var(--pine); line-height: 1; }
+    .stat-sub { font-size: 0.73rem; color: #aaa; font-weight: 300; }
+
+    .stat-day-row { display: flex; align-items: center; gap: 1rem; }
+    .stat-day-row > div:not(.stat-day-divider) { flex: 1; }
+    .stat-day-divider { width: 1px; align-self: stretch; background: var(--mist); flex-shrink: 0; }
+
+    /* EXPORT PANEL */
+    .export-panel { background: var(--white); border: 1px solid var(--mist); border-radius: 4px; padding: 1.5rem 1.75rem; margin-bottom: 1.5rem; display: none; animation: fadeUp 0.2s ease both; }
+    .export-panel.open { display: block; }
+    .export-panel-title { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--pine-light); margin-bottom: 1.2rem; display: flex; align-items: center; gap: 0.5rem; }
+    .export-panel-title::after { content: ''; flex: 1; height: 1px; background: var(--mist); }
+    .export-filters { display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-end; }
+    .export-field { display: flex; flex-direction: column; gap: 0.35rem; }
+    .export-field label { font-size: 0.7rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: #777; }
+    .export-input { padding: 0.55rem 0.8rem; border: 1.5px solid var(--mist); border-radius: 3px; font-family: 'Jost', sans-serif; font-size: 0.83rem; background: var(--snow); outline: none; transition: border-color 0.2s; min-width: 150px; appearance: none; -webkit-appearance: none; }
+    .export-input:focus { border-color: var(--pine-light); }
+    select.export-input { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23ccc'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.65rem center; padding-right: 2rem; cursor: pointer; }
+    .export-actions { display: flex; gap: 0.65rem; flex-wrap: wrap; align-items: flex-end; margin-left: auto; }
+    .btn-do-export { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.58rem 1.2rem; background: var(--pine); color: var(--white); border: none; border-radius: 3px; font-family: 'Jost', sans-serif; font-size: 0.78rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: background 0.2s; }
+    .btn-do-export:hover { background: var(--pine-light); }
+    .btn-do-export svg { width: 13px; height: 13px; }
+    .btn-export-all { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.58rem 1.2rem; background: transparent; color: var(--pine); border: 1.5px solid var(--mist); border-radius: 3px; font-family: 'Jost', sans-serif; font-size: 0.78rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: border-color 0.2s, background 0.2s; }
+    .btn-export-all:hover { border-color: var(--pine); background: rgba(44,74,62,0.04); }
+    .btn-export-all svg { width: 13px; height: 13px; }
+
+    /* TABS */
+    .tabs { display: flex; margin-bottom: 1.5rem; border-bottom: 2px solid var(--mist); }
+    .tab-btn { padding: 0.7rem 1.4rem; font-family: 'Jost', sans-serif; font-size: 0.78rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: #aaa; background: none; border: none; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: color 0.2s, border-color 0.2s; display: flex; align-items: center; gap: 0.4rem; }
+    .tab-btn.active { color: var(--pine); border-bottom-color: var(--pine); }
+    .tab-btn:hover:not(.active) { color: var(--ink); }
+    .tab-btn .tbadge { background: var(--danger); color: white; font-size: 0.62rem; font-weight: 700; padding: 0.1rem 0.45rem; border-radius: 2rem; display: none; }
+    .tab-btn .tbadge.show { display: inline-block; }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* TOOLBAR */
+    .toolbar { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.2rem; flex-wrap: wrap; }
+    .search-wrap { position: relative; flex: 1; min-width: 200px; }
+    .search-wrap svg { position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); width: 15px; height: 15px; color: var(--fog); pointer-events: none; }
+    .search-wrap input { width: 100%; padding: 0.6rem 0.75rem 0.6rem 2.2rem; border: 1.5px solid var(--mist); border-radius: 3px; font-family: 'Jost', sans-serif; font-size: 0.85rem; font-weight: 300; background: var(--white); outline: none; transition: border-color 0.2s; }
+    .search-wrap input:focus { border-color: var(--pine-light); }
+    .filter-select { padding: 0.6rem 2rem 0.6rem 0.75rem; border: 1.5px solid var(--mist); border-radius: 3px; font-family: 'Jost', sans-serif; font-size: 0.83rem; background: var(--white); outline: none; appearance: none; -webkit-appearance: none; cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23ccc'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.65rem center; transition: border-color 0.2s; }
+    .filter-select:focus { border-color: var(--pine-light); }
+    .count-badge { font-size: 0.73rem; color: #999; white-space: nowrap; }
+
+    /* DATE FILTER */
+    .date-filter-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .date-filter-wrap > svg {
+      position: absolute;
+      left: 0.65rem;
+      width: 14px; height: 14px;
+      color: var(--fog);
+      pointer-events: none;
+      z-index: 1;
+    }
+    .filter-date-input {
+      padding: 0.6rem 2rem 0.6rem 2.1rem;
+      border: 1.5px solid var(--mist);
+      border-radius: 3px;
+      font-family: 'Jost', sans-serif;
+      font-size: 0.83rem;
+      background: var(--white);
+      outline: none;
+      appearance: none; -webkit-appearance: none;
+      cursor: pointer;
+      transition: border-color 0.2s;
+      color: var(--ink);
+      min-width: 160px;
+    }
+    .filter-date-input:focus { border-color: var(--pine-light); }
+    .filter-date-input.active { border-color: var(--pine); background: rgba(44,74,62,0.04); }
+    .btn-clear-date {
+      position: absolute;
+      right: 0.45rem;
+      background: none;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      padding: 0.15rem;
+      color: #bbb;
+      transition: color 0.15s;
+    }
+    .btn-clear-date:hover { color: var(--danger); }
+    .btn-clear-date svg { width: 12px; height: 12px; }
+
+    /* BULK ACTION BAR */
+    .bulk-bar {
+      display: none;
+      align-items: center;
+      gap: 1rem;
+      background: var(--pine);
+      padding: 0.65rem 1.2rem;
+      border-radius: 3px;
+      margin-bottom: 0.85rem;
+      animation: fadeUp 0.15s ease both;
+    }
+    .bulk-bar.show { display: flex; }
+    .bulk-bar-label { color: rgba(255,255,255,0.8); font-size: 0.8rem; font-weight: 400; flex: 1; }
+    .bulk-bar-label strong { color: var(--white); font-weight: 600; }
+    .btn-bulk-trash {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      padding: 0.45rem 1rem;
+      background: rgba(192,57,43,0.25); color: #f1948a;
+      border: 1px solid rgba(192,57,43,0.35); border-radius: 3px;
+      font-family: 'Jost', sans-serif; font-size: 0.73rem; font-weight: 500;
+      letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-bulk-trash:hover { background: rgba(192,57,43,0.4); }
+    .btn-bulk-trash svg { width: 13px; height: 13px; }
+    .btn-bulk-cancel {
+      background: none; border: none; color: rgba(255,255,255,0.45);
+      font-family: 'Jost', sans-serif; font-size: 0.73rem; cursor: pointer;
+      letter-spacing: 0.08em; text-transform: uppercase; transition: color 0.15s;
+    }
+    .btn-bulk-cancel:hover { color: var(--white); }
+
+    /* TABLE */
+    .table-wrap { background: var(--white); border: 1px solid var(--mist); border-radius: 4px; overflow: auto; box-shadow: 0 1px 12px rgba(44,74,62,0.05); }
+    table { width: 100%; border-collapse: collapse; }
+    thead th { background: var(--pine); color: rgba(255,255,255,0.7); font-size: 0.67rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; padding: 0.85rem 1rem; text-align: left; white-space: nowrap; }
+    tbody tr { border-bottom: 1px solid var(--mist); transition: background 0.15s; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: rgba(44,74,62,0.03); }
+    tbody tr.selected { background: rgba(44,74,62,0.06); }
+    td { padding: 0.85rem 1rem; font-size: 0.83rem; font-weight: 300; color: var(--ink); vertical-align: middle; }
+    td.fw { font-weight: 500; }
+    td.cb-cell { width: 40px; padding-right: 0; }
+    th.cb-cell { width: 40px; padding-right: 0; }
+
+    /* CHECKBOX */
+    .cb {
+      width: 16px; height: 16px;
+      border: 1.5px solid var(--fog);
+      border-radius: 3px;
+      cursor: pointer;
+      appearance: none; -webkit-appearance: none;
+      background: var(--white);
+      transition: background 0.15s, border-color 0.15s;
+      display: block;
+    }
+    .cb:checked { background: var(--pine); border-color: var(--pine); }
+    .cb:checked::after { content: ''; display: block; width: 4px; height: 7px; border: 2px solid white; border-top: none; border-left: none; transform: rotate(45deg) translate(2px, 0px); }
+    .cb:hover:not(:checked) { border-color: var(--pine-light); }
+    thead .cb:indeterminate { background: var(--pine); border-color: var(--pine); }
+    thead .cb:indeterminate::after { content: ''; display: block; width: 8px; height: 2px; background: white; margin: auto; margin-top: 5px; }
+
+    .hotel-badge { display: inline-block; padding: 0.2rem 0.65rem; border-radius: 2rem; font-size: 0.68rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; }
+    .badge-hilton { background: rgba(26,58,107,0.1); color: var(--badge-hilton); }
+    .badge-hinode { background: rgba(122,78,45,0.1); color: var(--badge-hinode); }
+    .badge-green  { background: rgba(44,74,62,0.12); color: var(--badge-green); }
+    .items-pill { display: inline-flex; align-items: center; justify-content: center; min-width: 28px; height: 22px; padding: 0 0.5rem; background: rgba(196,169,107,0.12); color: #8a6f3a; border-radius: 2rem; font-size: 0.75rem; font-weight: 600; }
+    .special-note { color: #888; font-style: italic; font-size: 0.78rem; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .no-note { color: var(--fog); font-size: 0.75rem; }
+    .submitted-at { font-size: 0.73rem; color: #aaa; font-weight: 300; }
+
+    /* TRASH */
+    .trash-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.2rem; flex-wrap: wrap; gap: 0.75rem; }
+    .trash-title { font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; font-weight: 400; color: var(--ink); }
+    .trash-sub { font-size: 0.75rem; color: #aaa; font-weight: 300; margin-top: 0.15rem; }
+    .trash-row td { opacity: 0.72; }
+    .btn-restore-all { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.5rem 1.1rem; background: rgba(44,74,62,0.08); color: var(--pine); border: 1.5px solid rgba(44,74,62,0.15); border-radius: 3px; font-family: 'Jost', sans-serif; font-size: 0.75rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: all 0.2s; }
+    .btn-restore-all:hover { background: rgba(44,74,62,0.14); }
+    .btn-restore-all svg { width: 13px; height: 13px; }
+    .btn-empty-trash { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.5rem 1.1rem; background: rgba(192,57,43,0.08); color: var(--danger); border: 1.5px solid rgba(192,57,43,0.2); border-radius: 3px; font-family: 'Jost', sans-serif; font-size: 0.75rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: all 0.2s; }
+    .btn-empty-trash:hover { background: rgba(192,57,43,0.15); }
+    .btn-empty-trash svg { width: 13px; height: 13px; }
+
+    .row-actions { display: flex; gap: 0.3rem; align-items: center; }
+    .btn-icon { background: none; border: none; cursor: pointer; padding: 0.3rem; border-radius: 3px; transition: color 0.15s, background 0.15s; display: flex; align-items: center; justify-content: center; }
+    .btn-icon svg { width: 15px; height: 15px; }
+    .btn-icon.restore { color: var(--fog); }
+    .btn-icon.restore:hover { color: var(--pine); background: rgba(44,74,62,0.07); }
+    .btn-icon.perm-delete { color: var(--fog); }
+    .btn-icon.perm-delete:hover { color: var(--danger); background: var(--danger-bg); }
+
+    /* EMPTY STATE */
+    .empty-state { text-align: center; padding: 4rem 2rem; display: none; }
+    .empty-state.show { display: block; }
+    .empty-state svg { color: var(--fog); margin-bottom: 1rem; }
+    .empty-state h3 { font-family: 'Cormorant Garamond', serif; font-size: 1.4rem; font-weight: 400; color: #bbb; margin-bottom: 0.4rem; }
+    .empty-state p { font-size: 0.82rem; color: #ccc; font-weight: 300; }
+
+    /* MODAL */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 200; display: none; align-items: center; justify-content: center; padding: 1rem; }
+    .modal-overlay.show { display: flex; }
+    .modal { background: var(--white); border-radius: 4px; padding: 2rem; max-width: 420px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.2); animation: fadeUp 0.2s ease both; }
+    .modal h3 { font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; margin-bottom: 0.6rem; }
+    .modal p { font-size: 0.85rem; color: #666; font-weight: 300; line-height: 1.6; margin-bottom: 1.5rem; }
+    .modal-btns { display: flex; gap: 0.75rem; justify-content: flex-end; }
+    .btn-cancel { padding: 0.6rem 1.3rem; background: var(--snow); border: 1.5px solid var(--mist); border-radius: 3px; font-family: 'Jost', sans-serif; font-size: 0.8rem; font-weight: 500; color: #666; cursor: pointer; letter-spacing: 0.08em; text-transform: uppercase; transition: border-color 0.2s; }
+    .btn-cancel:hover { border-color: var(--fog); }
+    .btn-confirm-delete { padding: 0.6rem 1.3rem; background: var(--danger); border: none; border-radius: 3px; font-family: 'Jost', sans-serif; font-size: 0.8rem; font-weight: 500; color: var(--white); cursor: pointer; letter-spacing: 0.08em; text-transform: uppercase; transition: background 0.2s; }
+    .btn-confirm-delete:hover { background: #a93226; }
+
+    /* TOAST */
+    .toast { position: fixed; bottom: 2rem; right: 2rem; background: var(--pine); color: var(--white); padding: 0.75rem 1.25rem; border-radius: 3px; font-size: 0.82rem; font-weight: 400; box-shadow: 0 4px 20px rgba(0,0,0,0.2); transform: translateY(20px); opacity: 0; transition: all 0.3s ease; z-index: 300; pointer-events: none; }
+    .toast.show { transform: translateY(0); opacity: 1; }
+
+    footer { text-align: center; padding: 2rem; font-size: 0.72rem; color: #ccc; letter-spacing: 0.05em; }
+
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* ═══════════════════════════════════════
+       RESPONSIVE — three clean breakpoints
+       Desktop  : > 900px   (default styles)
+       Tablet   : 601–900px
+       Mobile   : ≤ 600px
+       Sm phone : ≤ 390px
+    ═══════════════════════════════════════ */
+
+    /* ── TABLET (601px – 900px) ── */
+    @media (min-width: 601px) and (max-width: 900px) {
+      .container { padding: 1.5rem 1.25rem 3rem; }
+
+      /* Topbar */
+      .topbar { padding: 0 1.25rem; }
+      .topbar-title span { display: none; }
+      #topbarUser { display: none; }
+
+      /* Stats: 2×2 grid */
+      .stats-bar { grid-template-columns: repeat(2, 1fr); gap: 0.85rem; }
+      .stat-value { font-size: 1.75rem; }
+
+      /* Export panel */
+      .export-filters { flex-direction: column; gap: 0.85rem; }
+      .export-input { min-width: 100%; }
+      .export-actions { margin-left: 0; width: 100%; }
+      .btn-do-export, .btn-export-all { flex: 1; justify-content: center; }
+
+      /* Toolbar */
+      .toolbar { flex-wrap: wrap; gap: 0.65rem; }
+      .search-wrap { min-width: 100%; order: -1; }
+      .filter-select { flex: 1; }
+
+      /* Table: hide lower-priority columns */
+      th.hide-tablet, td.hide-tablet { display: none; }
+
+      /* Bulk bar */
+      .bulk-bar { flex-wrap: wrap; gap: 0.5rem; }
+
+      /* Trash header */
+      .trash-header { flex-direction: column; align-items: flex-start; }
+
+      /* Modal */
+      .modal { padding: 1.5rem; }
+    }
+
+    /* ── MOBILE (≤ 600px) ── */
+    @media (max-width: 600px) {
+      .container { padding: 1rem 0.75rem 3rem; }
+
+      /* Topbar: tighter, hide subtitle and username */
+      .topbar { padding: 0 0.85rem; height: 54px; }
+      .topbar-title span { display: none; }
+      .topbar-title { font-size: 1rem; }
+      .topbar-left svg { display: none; }
+      #topbarUser { display: none; }
+      .btn-small { padding: 0.4rem 0.75rem; font-size: 0.68rem; letter-spacing: 0.07em; }
+      .btn-small span.btn-label { display: none; } /* hide text, keep icon */
+
+      /* Login card */
+      .login-card { max-width: 100%; }
+      .login-body { padding: 1.5rem; }
+      /* Prevent iOS zoom on inputs */
+      .login-input-wrap input,
+      input[type="text"], input[type="date"], input[type="password"],
+      select, textarea { font-size: 1rem !important; }
+
+      /* Stats: 2×2 grid */
+      .stats-bar { grid-template-columns: repeat(2, 1fr); gap: 0.6rem; margin-bottom: 1.25rem; }
+      .stat-card { padding: 0.85rem 1rem; }
+      .stat-value { font-size: 1.55rem; }
+      .stat-label { font-size: 0.62rem; }
+      .stat-sub { font-size: 0.67rem; }
+
+      /* Export panel */
+      .export-panel { padding: 1.1rem 1rem; }
+      .export-filters { flex-direction: column; gap: 0.75rem; }
+      .export-input { min-width: 100%; }
+      .export-actions { margin-left: 0; width: 100%; flex-direction: column; }
+      .btn-do-export, .btn-export-all { width: 100%; justify-content: center; }
+
+      /* Tabs */
+      .tab-btn { padding: 0.65rem 1rem; font-size: 0.72rem; }
+
+      /* Toolbar stacks */
+      .toolbar { flex-direction: column; align-items: stretch; gap: 0.5rem; }
+      .search-wrap { min-width: 100%; }
+      .filter-select { width: 100%; }
+      .count-badge { text-align: right; }
+
+      /* Bulk bar */
+      .bulk-bar { flex-wrap: wrap; gap: 0.5rem; padding: 0.6rem 0.85rem; }
+      .bulk-bar-label { width: 100%; }
+      .btn-bulk-trash { flex: 1; justify-content: center; }
+
+      /* Table: hide secondary columns, enable horizontal scroll */
+      .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 4px; }
+      table { min-width: 480px; }
+      th.hide-mobile, td.hide-mobile { display: none; }
+      thead th { padding: 0.75rem 0.65rem; font-size: 0.62rem; }
+      td { padding: 0.75rem 0.65rem; font-size: 0.8rem; }
+      td.cb-cell, th.cb-cell { width: 32px; padding-right: 0; padding-left: 0.5rem; }
+
+      /* Trash header */
+      .trash-header { flex-direction: column; align-items: flex-start; gap: 0.85rem; }
+      .trash-header > div:last-child { width: 100%; }
+      .btn-restore-all, .btn-empty-trash { flex: 1; justify-content: center; }
+
+      /* Modal: full-width bottom sheet feel */
+      .modal-overlay { align-items: flex-end; padding: 0; }
+      .modal { border-radius: 12px 12px 0 0; padding: 1.5rem 1.25rem 2rem; max-width: 100%; }
+      .modal-btns { flex-direction: column-reverse; gap: 0.5rem; }
+      .btn-cancel, .btn-confirm-delete { width: 100%; text-align: center; justify-content: center; padding: 0.8rem; }
+
+      /* Toast: full width bottom */
+      .toast { left: 0.75rem; right: 0.75rem; bottom: 1rem; text-align: center; }
+    }
+
+    /* ── SMALL PHONES (≤ 390px) ── */
+    @media (max-width: 390px) {
+      .stats-bar { grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+      .stat-value { font-size: 1.3rem; }
+      .topbar-right { gap: 0.4rem; }
+      .btn-small { padding: 0.38rem 0.6rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ═══ LOGIN SCREEN ═══ -->
+  <div id="loginScreen">
+    <div class="login-card">
+      <div class="login-header">
+        <div class="login-logo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
+            <line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/>
+          </svg>
+        </div>
+        <h1>Admin Panel</h1>
+        <p>Niseko Cluster · Luggage Pick-up</p>
+      </div>
+      <div class="login-body">
+        <div class="login-error" id="loginError">Incorrect username or password.</div>
+        <div class="login-field">
+          <label>Username</label>
+          <div class="login-input-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <input type="text" id="loginUser" placeholder="Username" autocomplete="username" />
+          </div>
+        </div>
+        <div class="login-field">
+          <label>Password</label>
+          <div class="login-input-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <input type="password" id="loginPass" placeholder="Password" autocomplete="current-password" />
+          </div>
+        </div>
+        <button class="btn-login" onclick="doLogin()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+          Sign In
+        </button>
+      </div>
+      <div class="login-footer">Internal use only · Niseko Cluster</div>
+    </div>
+  </div>
+
+  <!-- ═══ ADMIN APP ═══ -->
+  <div id="adminApp">
+
+    <div class="topbar">
+      <div class="topbar-left">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
+          <line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/>
+        </svg>
+        <span class="topbar-title">Luggage Pick-up <span>Admin Panel</span></span>
+      </div>
+      <div class="topbar-right">
+        <span id="topbarUser" style="font-size:0.72rem;color:rgba(255,255,255,0.45);letter-spacing:0.08em;text-transform:uppercase;"></span>
+        <button class="btn-small btn-export" onclick="toggleExportPanel()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export
+        </button>
+        <button class="btn-small btn-logout" onclick="doLogout()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Sign Out
+        </button>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <!-- STATS -->
+      <div class="stats-bar">
+        <div class="stat-card">
+          <div class="stat-label">Total Requests</div>
+          <div class="stat-value" id="statTotal">0</div>
+          <div class="stat-sub" id="statTotalSub">all time</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-day-row">
+            <div>
+              <div class="stat-label">Today</div>
+              <div class="stat-value" id="statToday">0</div>
+              <div class="stat-sub" id="statTodayDate">—</div>
+            </div>
+            <div class="stat-day-divider"></div>
+            <div>
+              <div class="stat-label">Tomorrow</div>
+              <div class="stat-value" id="statTomorrow">0</div>
+              <div class="stat-sub" id="statTomorrowDate">—</div>
+            </div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Total Items</div>
+          <div class="stat-value" id="statItems">0</div>
+          <div class="stat-sub" id="statItemsSub">pieces of luggage</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Most Active</div>
+          <div class="stat-value" id="statHotel" style="font-size:1.1rem;margin-top:0.4rem">—</div>
+          <div class="stat-sub">hotel</div>
+        </div>
+      </div>
+
+      <!-- EXPORT PANEL -->
+      <div class="export-panel" id="exportPanel">
+        <div class="export-panel-title">Export Options</div>
+        <div class="export-filters">
+          <div class="export-field">
+            <label>Hotel</label>
+            <select id="exportHotel" class="export-input">
+              <option value="">All Hotels</option>
+              <option>Hilton</option>
+              <option>Hinode Hills</option>
+              <option>Green Leaf</option>
+            </select>
+          </div>
+          <div class="export-field">
+            <label>Pick-up Date From</label>
+            <input type="date" id="exportDateFrom" class="export-input"/>
+          </div>
+          <div class="export-field">
+            <label>Pick-up Date To</label>
+            <input type="date" id="exportDateTo" class="export-input"/>
+          </div>
+          <div class="export-actions">
+            <button class="btn-export-all" onclick="exportCSV(false)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Export All
+            </button>
+            <button class="btn-do-export" onclick="exportCSV(true)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Export Filtered
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- TABS -->
+      <div class="tabs">
+        <button class="tab-btn active" id="tabRecords" onclick="switchTab('records')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+          Records
+        </button>
+        <button class="tab-btn" id="tabTrash" onclick="switchTab('trash')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>
+          Trash
+          <span class="tbadge" id="trashBadge"></span>
+        </button>
+      </div>
+
+      <!-- RECORDS TAB -->
+      <div class="tab-panel active" id="panelRecords">
+        <div class="toolbar">
+          <div class="search-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="searchInput" placeholder="Search by name, room, hotel…" oninput="renderTable()"/>
+          </div>
+          <select class="filter-select" id="filterHotel" onchange="renderTable()">
+            <option value="">All Hotels</option>
+            <option>Hilton</option>
+            <option>Hinode Hills</option>
+            <option>Green Leaf</option>
+          </select>
+          <div class="date-filter-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <input type="date" id="filterDate" class="filter-date-input" oninput="renderTable()" title="Filter by pick-up date"/>
+            <button class="btn-clear-date" id="btnClearDate" onclick="clearDateFilter()" title="Clear date filter" style="display:none">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+          </div>
+          <select class="filter-select" id="sortBy" onchange="renderTable()">
+            <option value="submittedAt-desc">Newest first</option>
+            <option value="submittedAt-asc">Oldest first</option>
+            <option value="date-asc">Pick-up date ↑</option>
+            <option value="date-desc">Pick-up date ↓</option>
+            <option value="name-asc">Name A–Z</option>
+          </select>
+          <span class="count-badge" id="countBadge"></span>
+        </div>
+
+        <!-- BULK ACTION BAR -->
+        <div class="bulk-bar" id="bulkBar">
+          <span class="bulk-bar-label"><strong id="bulkCount">0</strong> record(s) selected</span>
+          <button class="btn-bulk-trash" onclick="bulkMoveToTrash()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>
+            Move to Trash
+          </button>
+          <button class="btn-bulk-cancel" onclick="clearSelection()">Deselect All</button>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th class="cb-cell"><input type="checkbox" class="cb" id="selectAll" onchange="toggleSelectAll(this)"/></th>
+                <th>#</th><th>Hotel</th><th>Guest</th><th>Room</th>
+                <th>Pick-up Date</th><th>Time</th><th>Items</th>
+                <th class="hide-tablet hide-mobile">Special Request</th>
+                <th class="hide-tablet hide-mobile">Submitted</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+          </table>
+          <div class="empty-state" id="emptyState">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+            <h3>No requests found</h3>
+            <p>Submitted luggage requests will appear here.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- TRASH TAB -->
+      <div class="tab-panel" id="panelTrash">
+        <div class="trash-header">
+          <div>
+            <div class="trash-title">Trash</div>
+            <div class="trash-sub">Deleted records are kept here until permanently removed.</div>
+          </div>
+          <div style="display:flex;gap:0.65rem;flex-wrap:wrap;">
+            <button class="btn-restore-all" onclick="restoreAll()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+              Restore All
+            </button>
+            <button class="btn-empty-trash" onclick="confirmEmptyTrash()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>
+              Empty Trash
+            </button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th><th>Hotel</th><th>Guest</th><th>Room</th>
+                <th>Pick-up Date</th><th>Time</th><th>Items</th>
+                <th class="hide-tablet hide-mobile">Deleted At</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="trashBody"></tbody>
+          </table>
+          <div class="empty-state" id="emptyTrash">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>
+            <h3>Trash is empty</h3>
+            <p>Deleted records will appear here.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <footer>Niseko Cluster · Luggage Pick-up Admin · Internal Use Only</footer>
+  </div>
+
+  <!-- MODAL -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+      <h3 id="modalTitle">Confirm</h3>
+      <p id="modalMsg"></p>
+      <div class="modal-btns">
+        <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+        <button class="btn-confirm-delete" id="modalConfirmBtn">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // ── CREDENTIALS (change these) ──
+    const USERS = {
+      'admin':    'niseko2026',
+      'manager':  'cluster2026'
+    };
+
+    const AUTH_KEY  = 'luggage_admin_session';
+
+    // ── RAILWAY API ──
+    // Set your Railway backend URL here (no trailing slash)
+    const API_URL = 'https://YOUR-APP.up.railway.app';
+
+    // ── AUTH ──
+    function doLogin() {
+      const user = document.getElementById('loginUser').value.trim();
+      const pass = document.getElementById('loginPass').value;
+      const err  = document.getElementById('loginError');
+      if (USERS[user] && USERS[user] === pass) {
+        sessionStorage.setItem(AUTH_KEY, user);
+        err.classList.remove('show');
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('adminApp').classList.add('show');
+        document.getElementById('topbarUser').textContent = user;
+        loadAll();
+      } else {
+        err.classList.add('show');
+        document.getElementById('loginPass').value = '';
+        document.getElementById('loginPass').focus();
+      }
+    }
+
+    function doLogout() {
+      sessionStorage.removeItem(AUTH_KEY);
+      document.getElementById('adminApp').classList.remove('show');
+      document.getElementById('loginScreen').style.display = 'flex';
+      document.getElementById('loginUser').value = '';
+      document.getElementById('loginPass').value = '';
+      clearSelection();
+    }
+
+    // Allow Enter key on login form
+    ['loginUser','loginPass'].forEach(id => {
+      document.getElementById(id).addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+    });
+
+    // Check session on load
+    window.addEventListener('load', () => {
+      const saved = sessionStorage.getItem(AUTH_KEY);
+      if (saved && USERS[saved]) {
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('adminApp').classList.add('show');
+        document.getElementById('topbarUser').textContent = saved;
+        loadAll();
+      }
+    });
+
+    // Auto-refresh from Railway every 30 seconds
+    setInterval(() => {
+      if (sessionStorage.getItem(AUTH_KEY)) loadAll();
+    }, 30000);
+
+    // ── API STORAGE ──
+    // In-memory cache — refreshed on every loadAll()
+    let _records = [];
+    let _trash   = [];
+
+    function getRecords() { return _records; }
+    function getTrash()   { return _trash;   }
+
+    // Fetch everything from Railway and re-render
+    async function loadAll() {
+      try {
+        const [recRes, trashRes] = await Promise.all([
+          fetch(`${API_URL}/api/luggage`),
+          fetch(`${API_URL}/api/luggage/trash`)
+        ]);
+        _records = recRes.ok  ? await recRes.json()  : [];
+        _trash   = trashRes.ok ? await trashRes.json() : [];
+      } catch (e) {
+        console.error('loadAll failed', e);
+        _records = [];
+        _trash   = [];
+      }
+      renderTable();
+      renderTrash();
+      updateStats();
+    }
+
+    // Move record(s) to trash
+    async function apiMoveToTrash(ids) {
+      await fetch(`${API_URL}/api/luggage/trash`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids })
+      });
+      await loadAll();
+    }
+
+    // Restore from trash
+    async function apiRestore(ids) {
+      await fetch(`${API_URL}/api/luggage/restore`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids })
+      });
+      await loadAll();
+    }
+
+    // Permanently delete
+    async function apiPermDelete(ids) {
+      await fetch(`${API_URL}/api/luggage/permanent`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids })
+      });
+      await loadAll();
+    }
+
+    // ── HELPERS ──
+    function hotelBadge(hotel) {
+      const cls = hotel === 'Hilton' ? 'badge-hilton' : hotel === 'Hinode Hills' ? 'badge-hinode' : 'badge-green';
+      return `<span class="hotel-badge ${cls}">${hotel}</span>`;
+    }
+    function formatDate(iso) {
+      if (!iso) return '—';
+      const [y, m, d] = iso.split('-');
+      return `${d}/${m}/${y}`;
+    }
+    function formatSubmitted(iso) {
+      if (!iso) return '—';
+      const d = new Date(iso);
+      return d.toLocaleDateString('en-GB', { day:'2-digit', month:'short' })
+           + ' ' + d.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' });
+    }
+    function escHtml(str) {
+      return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    // ── STATS ──
+    function updateStats() {
+      const allRecords = getRecords();
+      const nowJST = new Date(Date.now() + 9 * 60 * 60 * 1000);
+      const today = nowJST.toISOString().split('T')[0];
+      const tomorrowJST = new Date(nowJST.getTime() + 24 * 60 * 60 * 1000);
+      const tomorrow = tomorrowJST.toISOString().split('T')[0];
+
+      // Read active filters
+      const filterHotelEl = document.getElementById('filterHotel');
+      const filterDateEl  = document.getElementById('filterDate');
+      const filterHotel   = filterHotelEl ? filterHotelEl.value : '';
+      const filterDate    = filterDateEl  ? filterDateEl.value  : '';
+
+      // Filtered subset for Total Requests & Total Items
+      const filtered = allRecords.filter(r => {
+        const mH = !filterHotel || r.hotel === filterHotel;
+        const mD = !filterDate  || r.date  === filterDate;
+        return mH && mD;
+      });
+
+      const todayCount    = allRecords.filter(r => r.date === today).length;
+      const tomorrowCount = allRecords.filter(r => r.date === tomorrow).length;
+      const totalItems = filtered.reduce((s, r) => { const n = parseInt(r.items); return s + (isNaN(n) ? 0 : n); }, 0);
+
+      // Most active hotel (always from full dataset)
+      const hc = {};
+      allRecords.forEach(r => { hc[r.hotel] = (hc[r.hotel] || 0) + 1; });
+      const topH = Object.entries(hc).sort((a,b) => b[1]-a[1])[0];
+
+      // Update Total Requests
+      document.getElementById('statTotal').textContent = filtered.length;
+      const isFiltered = filterHotel || filterDate;
+      const subTotal = document.getElementById('statTotalSub');
+      if (subTotal) {
+        if (isFiltered) {
+          const parts = [];
+          if (filterHotel) parts.push(filterHotel);
+          if (filterDate)  parts.push(formatDate(filterDate));
+          subTotal.textContent = parts.join(' · ');
+        } else {
+          subTotal.textContent = 'all time';
+        }
+      }
+
+      // Update Total Items
+      document.getElementById('statItems').textContent = totalItems + (filtered.some(r => r.items === '10+') ? '+' : '');
+      const subItems = document.getElementById('statItemsSub');
+      if (subItems) {
+        subItems.textContent = isFiltered ? (filterHotel || filterDate ? 'filtered' : 'pieces of luggage') : 'pieces of luggage';
+      }
+
+      document.getElementById('statToday').textContent = todayCount;
+      document.getElementById('statTodayDate').textContent = formatDate(today);
+      document.getElementById('statTomorrow').textContent = tomorrowCount;
+      document.getElementById('statTomorrowDate').textContent = formatDate(tomorrow);
+      document.getElementById('statHotel').textContent = topH ? topH[0] : '—';
+
+      const tc = getTrash().length;
+      const badge = document.getElementById('trashBadge');
+      badge.textContent = tc;
+      badge.classList.toggle('show', tc > 0);
+    }
+
+    // ── TABS ──
+    function switchTab(tab) {
+      ['Records','Trash'].forEach(t => {
+        document.getElementById('panel' + t).classList.toggle('active', t.toLowerCase() === tab);
+        document.getElementById('tab'   + t).classList.toggle('active', t.toLowerCase() === tab);
+      });
+      if (tab === 'trash') renderTrash();
+      clearSelection();
+    }
+
+    // ── EXPORT PANEL ──
+    function toggleExportPanel() {
+      document.getElementById('exportPanel').classList.toggle('open');
+    }
+
+    // ── SELECTION ──
+    let selectedIds = new Set();
+
+    function updateBulkBar() {
+      const bar = document.getElementById('bulkBar');
+      document.getElementById('bulkCount').textContent = selectedIds.size;
+      bar.classList.toggle('show', selectedIds.size > 0);
+      // Update header checkbox state
+      const allCbs = [...document.querySelectorAll('input.row-cb')];
+      const hdr = document.getElementById('selectAll');
+      if (allCbs.length === 0) { hdr.checked = false; hdr.indeterminate = false; return; }
+      const checkedCount = allCbs.filter(c => c.checked).length;
+      hdr.indeterminate = checkedCount > 0 && checkedCount < allCbs.length;
+      hdr.checked = checkedCount === allCbs.length;
+    }
+
+    function toggleSelectAll(hdr) {
+      const allCbs = document.querySelectorAll('input.row-cb');
+      allCbs.forEach(cb => {
+        cb.checked = hdr.checked;
+        const row = cb.closest('tr');
+        row.classList.toggle('selected', hdr.checked);
+        const id = parseInt(cb.dataset.id);
+        if (hdr.checked) selectedIds.add(id); else selectedIds.delete(id);
+      });
+      updateBulkBar();
+    }
+
+    function toggleRow(cb) {
+      const id = parseInt(cb.dataset.id);
+      const row = cb.closest('tr');
+      row.classList.toggle('selected', cb.checked);
+      if (cb.checked) selectedIds.add(id); else selectedIds.delete(id);
+      updateBulkBar();
+    }
+
+    function clearSelection() {
+      selectedIds.clear();
+      document.querySelectorAll('input.row-cb').forEach(cb => { cb.checked = false; cb.closest('tr').classList.remove('selected'); });
+      const hdr = document.getElementById('selectAll');
+      if (hdr) { hdr.checked = false; hdr.indeterminate = false; }
+      document.getElementById('bulkBar').classList.remove('show');
+    }
+
+    async function bulkMoveToTrash() {
+      if (selectedIds.size === 0) return;
+      const count = selectedIds.size;
+      await apiMoveToTrash([...selectedIds]);
+      clearSelection();
+      showToast(`${count} record${count !== 1 ? 's' : ''} moved to Trash`);
+    }
+
+    // ── CLEAR DATE FILTER ──
+    function clearDateFilter() {
+      document.getElementById('filterDate').value = '';
+      renderTable();
+    }
+
+    // ── RENDER RECORDS ──
+    function renderTable() {
+      const records = getRecords();
+      const search = document.getElementById('searchInput').value.trim().toLowerCase();
+      const filterHotel = document.getElementById('filterHotel').value;
+      const filterDate = document.getElementById('filterDate').value;
+      const sortBy = document.getElementById('sortBy').value;
+
+      // Toggle clear button and active style
+      const clearBtn = document.getElementById('btnClearDate');
+      const dateInput = document.getElementById('filterDate');
+      clearBtn.style.display = filterDate ? 'flex' : 'none';
+      filterDate ? dateInput.classList.add('active') : dateInput.classList.remove('active');
+
+      updateStats();
+
+      let filtered = records.filter(r => {
+        const mH = !filterHotel || r.hotel === filterHotel;
+        const mD = !filterDate || r.date === filterDate;
+        const mS = !search || r.name.toLowerCase().includes(search) || r.room.toLowerCase().includes(search) || r.hotel.toLowerCase().includes(search) || (r.special && r.special.toLowerCase().includes(search));
+        return mH && mD && mS;
+      });
+
+      const [field, dir] = sortBy.split('-');
+      filtered.sort((a, b) => {
+        let va = a[field] || '', vb = b[field] || '';
+        if (field === 'submittedAt') { va = a.id || 0; vb = b.id || 0; }
+        const c = va < vb ? -1 : va > vb ? 1 : 0;
+        return dir === 'asc' ? c : -c;
+      });
+
+      const tbody = document.getElementById('tableBody');
+      const empty = document.getElementById('emptyState');
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = '';
+        empty.classList.add('show');
+        document.getElementById('countBadge').textContent = '0 records';
+        document.getElementById('selectAll').checked = false;
+        document.getElementById('selectAll').indeterminate = false;
+        return;
+      }
+      empty.classList.remove('show');
+      document.getElementById('countBadge').textContent = `${filtered.length} record${filtered.length !== 1 ? 's' : ''}`;
+
+      tbody.innerHTML = filtered.map((r, i) => {
+        const isSelected = selectedIds.has(r.id);
+        return `
+        <tr${isSelected ? ' class="selected"' : ''}>
+          <td class="cb-cell"><input type="checkbox" class="cb row-cb" data-id="${r.id}" ${isSelected ? 'checked' : ''} onchange="toggleRow(this)"/></td>
+          <td style="color:#ccc;font-size:0.73rem">${i+1}</td>
+          <td>${hotelBadge(r.hotel)}</td>
+          <td class="fw">${escHtml(r.name)}</td>
+          <td>${escHtml(r.room)}</td>
+          <td>${formatDate(r.date)}</td>
+          <td>${escHtml(r.time)}</td>
+          <td><span class="items-pill">${escHtml(r.items)}</span></td>
+          <td class="hide-tablet hide-mobile">${r.special ? `<span class="special-note" title="${escHtml(r.special)}">${escHtml(r.special)}</span>` : '<span class="no-note">—</span>'}</td>
+          <td class="hide-tablet hide-mobile"><span class="submitted-at">${formatSubmitted(r.submittedAt)}</span></td>
+        </tr>`;
+      }).join('');
+    }
+
+    // ── RENDER TRASH ──
+    function renderTrash() {
+      const trash = getTrash();
+      const tbody = document.getElementById('trashBody');
+      const empty = document.getElementById('emptyTrash');
+      if (!trash.length) { tbody.innerHTML = ''; empty.classList.add('show'); return; }
+      empty.classList.remove('show');
+      tbody.innerHTML = trash.map((r, i) => `
+        <tr class="trash-row">
+          <td style="color:#ccc;font-size:0.73rem">${i+1}</td>
+          <td>${hotelBadge(r.hotel)}</td>
+          <td class="fw">${escHtml(r.name)}</td>
+          <td>${escHtml(r.room)}</td>
+          <td>${formatDate(r.date)}</td>
+          <td>${escHtml(r.time)}</td>
+          <td><span class="items-pill">${escHtml(r.items)}</span></td>
+          <td class="hide-tablet hide-mobile"><span class="submitted-at">${formatSubmitted(r.deletedAt)}</span></td>
+          <td>
+            <div class="row-actions">
+              <button class="btn-icon restore" onclick="restoreFromTrash(${r.id})" title="Restore">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+              </button>
+              <button class="btn-icon perm-delete" onclick="confirmPermDelete(${r.id})" title="Delete Permanently">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </div>
+          </td>
+        </tr>`).join('');
+    }
+
+    // ── TRASH ACTIONS ──
+    async function restoreFromTrash(id) {
+      await apiRestore([id]);
+      showToast('Record restored');
+    }
+
+    async function restoreAll() {
+      const trash = getTrash();
+      if (!trash.length) { showToast('Trash is already empty'); return; }
+      const count = trash.length;
+      await apiRestore(trash.map(r => r.id));
+      showToast(`${count} record${count !== 1 ? 's' : ''} restored`);
+    }
+
+    function confirmPermDelete(id) {
+      const r = getTrash().find(x => x.id === id);
+      if (!r) return;
+      showModal('Delete Permanently',
+        `Permanently delete the request for ${r.name} (Room ${r.room}, ${r.hotel})? This cannot be undone.`,
+        async () => { closeModal(); await apiPermDelete([id]); showToast('Permanently deleted'); }
+      );
+    }
+
+    function confirmEmptyTrash() {
+      const trash = getTrash();
+      if (!trash.length) { showToast('Trash is already empty'); return; }
+      showModal('Empty Trash',
+        `Permanently delete all ${trash.length} record${trash.length !== 1 ? 's' : ''} in the trash? This cannot be undone.`,
+        async () => { closeModal(); await apiPermDelete(trash.map(r => r.id)); showToast('Trash emptied'); }
+      );
+    }
+
+    // ── MODAL ──
+    function showModal(title, msg, onConfirm) {
+      document.getElementById('modalTitle').textContent = title;
+      document.getElementById('modalMsg').textContent = msg;
+      document.getElementById('modalConfirmBtn').onclick = onConfirm;
+      document.getElementById('modalOverlay').classList.add('show');
+    }
+    function closeModal() { document.getElementById('modalOverlay').classList.remove('show'); }
+    document.getElementById('modalOverlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
+
+    // ── EXPORT ──
+    function exportCSV(useFilters) {
+      let records = getRecords();
+      if (!records.length) { showToast('No records to export'); return; }
+      let label = 'all';
+      if (useFilters) {
+        const hotel = document.getElementById('exportHotel').value;
+        const from  = document.getElementById('exportDateFrom').value;
+        const to    = document.getElementById('exportDateTo').value;
+        if (hotel) { records = records.filter(r => r.hotel === hotel); label = hotel.replace(/\s+/g,'-').toLowerCase(); }
+        if (from)  { records = records.filter(r => r.date >= from); label += `-from-${from}`; }
+        if (to)    { records = records.filter(r => r.date <= to);   label += `-to-${to}`; }
+        if (!records.length) { showToast('No records match selected filters'); return; }
+      }
+      const headers = ['ID','Submitted At','Hotel','Guest Name','Room','Pick-up Date','Pick-up Time','Items','Special Request'];
+      const rows = records.map(r => [r.id, r.submittedAt, r.hotel, r.name, r.room, r.date, r.time, r.items, r.special || ''].map(v => `"${String(v).replace(/"/g,'""')}"`).join(','));
+      const csv  = [headers.join(','), ...rows].join('\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href = url;
+      a.download = `luggage-requests-${label}-${new Date().toISOString().split('T')[0]}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast(`Exported ${records.length} record${records.length !== 1 ? 's' : ''}`);
+    }
+
+    // ── TOAST ──
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2500);
+    }
+
+    // Auto-refresh stats at midnight JST so Today/Tomorrow dates stay correct
+    (function scheduleMidnightRefresh() {
+      const nowJST = new Date(Date.now() + 9 * 60 * 60 * 1000);
+      const nextMidnightJST = new Date(Date.UTC(
+        nowJST.getUTCFullYear(), nowJST.getUTCMonth(), nowJST.getUTCDate() + 1
+      ) - 9 * 60 * 60 * 1000);
+      const msUntilMidnight = nextMidnightJST - Date.now();
+      setTimeout(() => { loadAll(); scheduleMidnightRefresh(); }, msUntilMidnight);
+    })();
+  </script>
+</body>
+</html>

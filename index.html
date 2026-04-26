@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Luggage Pick-up | Niseko Cluster</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --snow: #f7f5f2;
+      --ink: #1a1a1a;
+      --pine: #2c4a3e;
+      --pine-light: #3d6b5a;
+      --gold: #c4a96b;
+      --mist: #e8e4de;
+      --fog: #d4cfc8;
+      --white: #ffffff;
+      --error: #c0392b;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Jost', sans-serif;
+      background-color: var(--snow);
+      color: var(--ink);
+      min-height: 100vh;
+    }
+
+    /* ── HERO BANNER ── */
+    .hero {
+      position: relative;
+      width: 100%;
+      height: 380px;
+      overflow: hidden;
+      background: linear-gradient(160deg, #1e3530 0%, #2c4a3e 40%, #3d6b5a 100%);
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 60% 80% at 80% 50%, rgba(196,169,107,0.12) 0%, transparent 70%),
+        url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M50 50c0-5.523 4.477-10 10-10s10 4.477 10 10-4.477 10-10 10c0 5.523-4.477 10-10 10s-10-4.477-10-10 4.477-10 10-10zM10 10c0-5.523 4.477-10 10-10s10 4.477 10 10-4.477 10-10 10c0 5.523-4.477 10-10 10S0 25.523 0 20s4.477-10 10-10z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      pointer-events: none;
+    }
+
+    .hero-image-wrap {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0.18;
+    }
+
+    .hero-image-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      mix-blend-mode: luminosity;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 0 2rem;
+      gap: 1rem;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(196,169,107,0.15);
+      border: 1px solid rgba(196,169,107,0.35);
+      color: var(--gold);
+      font-family: 'Jost', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      padding: 0.35rem 1rem;
+      border-radius: 2rem;
+    }
+
+    .hero-badge svg { width: 14px; height: 14px; }
+
+    .hero h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      font-size: clamp(2.4rem, 5vw, 3.8rem);
+      color: var(--white);
+      letter-spacing: 0.04em;
+      line-height: 1.1;
+    }
+
+    .hero-subtitle {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      color: rgba(255,255,255,0.6);
+      font-size: 0.85rem;
+      font-weight: 300;
+      letter-spacing: 0.05em;
+    }
+
+    .hero-subtitle span.dot {
+      width: 4px; height: 4px;
+      background: var(--gold);
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .hero-notice {
+      font-size: 0.85rem;
+      font-weight: 300;
+      letter-spacing: 0.05em;
+      color: rgba(255,255,255,0.6);
+      margin-top: -0.25rem;
+    }
+
+    /* ── MAIN CONTAINER ── */
+    .container {
+      max-width: 740px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem 5rem;
+    }
+
+    .form-card {
+      background: var(--white);
+      border-radius: 4px;
+      box-shadow: 0 2px 40px rgba(44,74,62,0.08), 0 1px 4px rgba(0,0,0,0.04);
+      overflow: hidden;
+    }
+
+    .form-card-header {
+      background: var(--pine);
+      padding: 1.8rem 2.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .form-card-header svg {
+      color: var(--gold);
+      flex-shrink: 0;
+    }
+
+    .form-card-header h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 400;
+      font-size: 1.55rem;
+      color: var(--white);
+      letter-spacing: 0.03em;
+    }
+
+    .form-card-header p {
+      color: rgba(255,255,255,0.55);
+      font-size: 0.78rem;
+      font-weight: 300;
+      letter-spacing: 0.06em;
+      margin-top: 0.15rem;
+    }
+
+    .form-body {
+      padding: 2.5rem;
+    }
+
+    /* ── SECTION LABELS ── */
+    .section-label {
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--pine-light);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--mist);
+    }
+
+    /* ── HOTEL SELECTOR ── */
+    .hotel-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.85rem;
+      margin-bottom: 2rem;
+    }
+
+    .hotel-option { position: relative; cursor: pointer; }
+
+    .hotel-option input[type="radio"] {
+      position: absolute;
+      opacity: 0;
+      width: 0; height: 0;
+    }
+
+    .hotel-card {
+      border: 1.5px solid var(--mist);
+      border-radius: 3px;
+      overflow: hidden;
+      transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+    }
+
+    .hotel-card img {
+      width: 100%;
+      height: 110px;
+      object-fit: cover;
+      display: block;
+      filter: saturate(0.7);
+      transition: filter 0.3s;
+    }
+
+    .hotel-card-label {
+      padding: 0.65rem 0.75rem;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--ink);
+      letter-spacing: 0.02em;
+      background: var(--white);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .hotel-card-label .check {
+      width: 14px; height: 14px;
+      border: 1.5px solid var(--fog);
+      border-radius: 50%;
+      flex-shrink: 0;
+      transition: background 0.2s, border-color 0.2s;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    .hotel-option input:checked ~ .hotel-card {
+      border-color: var(--pine);
+      box-shadow: 0 0 0 2px rgba(44,74,62,0.12);
+      transform: translateY(-2px);
+    }
+
+    .hotel-option input:checked ~ .hotel-card img {
+      filter: saturate(1);
+    }
+
+    .hotel-option input:checked ~ .hotel-card .hotel-card-label .check {
+      background: var(--pine);
+      border-color: var(--pine);
+    }
+
+    .hotel-option input:checked ~ .hotel-card .hotel-card-label .check::after {
+      content: '';
+      width: 5px; height: 5px;
+      background: white;
+      border-radius: 50%;
+    }
+
+    .hotel-option:hover .hotel-card {
+      border-color: var(--fog);
+    }
+
+    /* ── FORM FIELDS ── */
+    .fields-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.2rem;
+      margin-bottom: 2rem;
+    }
+
+    .field { display: flex; flex-direction: column; gap: 0.4rem; }
+    .field.full { grid-column: 1 / -1; }
+
+    label {
+      font-size: 0.73rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #555;
+    }
+
+    label .req { color: var(--gold); margin-left: 0.15rem; }
+
+    .input-wrap { position: relative; }
+
+    .input-wrap svg {
+      position: absolute;
+      left: 0.85rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--fog);
+      width: 16px; height: 16px;
+      pointer-events: none;
+      transition: color 0.2s;
+    }
+
+    input[type="text"],
+    input[type="date"],
+    select,
+    textarea {
+      width: 100%;
+      padding: 0.72rem 0.85rem 0.72rem 2.5rem;
+      border: 1.5px solid var(--mist);
+      border-radius: 3px;
+      font-family: 'Jost', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 300;
+      color: var(--ink);
+      background: var(--snow);
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    textarea {
+      padding-left: 2.5rem;
+      resize: vertical;
+      min-height: 90px;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: var(--pine-light);
+      box-shadow: 0 0 0 3px rgba(61,107,90,0.08);
+      background: var(--white);
+    }
+
+    .input-wrap:focus-within svg { color: var(--pine-light); }
+
+    .select-wrap::after {
+      content: '';
+      position: absolute;
+      right: 0.9rem;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 0;
+      height: 0;
+      border-left: 4px solid transparent;
+      border-right: 4px solid transparent;
+      border-top: 5px solid var(--fog);
+      pointer-events: none;
+    }
+
+    /* ── ERROR STATES ── */
+    .field.error input,
+    .field.error select,
+    .field.error textarea {
+      border-color: var(--error);
+    }
+
+    .field-error {
+      font-size: 0.71rem;
+      color: var(--error);
+      display: none;
+    }
+
+    .field.error .field-error { display: block; }
+
+    /* ── HOTEL ERROR ── */
+    .hotel-error {
+      font-size: 0.71rem;
+      color: var(--error);
+      margin-top: -0.5rem;
+      margin-bottom: 1.5rem;
+      display: none;
+    }
+
+    .hotel-error.show { display: block; }
+
+    /* ── DIVIDER ── */
+    .divider {
+      border: none;
+      border-top: 1px solid var(--mist);
+      margin: 2rem 0;
+    }
+
+    /* ── SUBMIT ── */
+    .submit-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .privacy-note {
+      font-size: 0.72rem;
+      color: #999;
+      font-weight: 300;
+      max-width: 340px;
+      line-height: 1.5;
+    }
+
+    .btn-submit {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      background: var(--pine);
+      color: var(--white);
+      border: none;
+      padding: 0.9rem 2rem;
+      font-family: 'Jost', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 500;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      cursor: pointer;
+      border-radius: 3px;
+      transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+    }
+
+    .btn-submit:hover {
+      background: var(--pine-light);
+      box-shadow: 0 4px 20px rgba(44,74,62,0.25);
+      transform: translateY(-1px);
+    }
+
+    .btn-submit:active { transform: translateY(0); }
+
+    .btn-submit:disabled {
+      background: var(--fog);
+      color: rgba(255,255,255,0.7);
+      cursor: not-allowed;
+      box-shadow: none;
+      transform: none;
+    }
+
+    .btn-submit:disabled:hover {
+      background: var(--fog);
+      box-shadow: none;
+      transform: none;
+    }
+
+    .closed-notice {
+      display: none;
+      align-items: center;
+      gap: 0.6rem;
+      background: rgba(192,57,43,0.06);
+      border: 1px solid rgba(192,57,43,0.18);
+      border-radius: 3px;
+      padding: 0.65rem 1rem;
+      font-size: 0.78rem;
+      color: #a93226;
+      font-weight: 400;
+      line-height: 1.45;
+      margin-top: 0.5rem;
+      width: 100%;
+    }
+
+    .closed-notice.show { display: flex; }
+    .closed-notice svg { flex-shrink: 0; width: 15px; height: 15px; color: #c0392b; }
+
+    .btn-submit svg { width: 16px; height: 16px; }
+
+    /* ── SUCCESS ── */
+    .success-screen {
+      display: none;
+      padding: 3.5rem 2.5rem;
+      text-align: center;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .success-screen.show { display: flex; }
+    .form-body.hidden { display: none; }
+
+    .success-icon {
+      width: 64px; height: 64px;
+      background: rgba(44,74,62,0.08);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 0.5rem;
+    }
+
+    .success-icon svg { width: 30px; height: 30px; color: var(--pine); }
+
+    .success-screen h3 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.7rem;
+      font-weight: 400;
+      color: var(--ink);
+    }
+
+    .success-screen p {
+      color: #777;
+      font-size: 0.88rem;
+      font-weight: 300;
+      max-width: 360px;
+      line-height: 1.7;
+    }
+
+    .summary-box {
+      background: var(--snow);
+      border: 1px solid var(--mist);
+      border-radius: 3px;
+      padding: 1.2rem 1.5rem;
+      text-align: left;
+      width: 100%;
+      max-width: 400px;
+      font-size: 0.83rem;
+    }
+
+    .summary-box .row {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.35rem 0;
+      border-bottom: 1px solid var(--mist);
+    }
+
+    .summary-box .row:last-child { border-bottom: none; }
+    .summary-box .row .k { color: #888; font-weight: 400; }
+    .summary-box .row .v { font-weight: 500; color: var(--ink); text-align: right; }
+
+    .btn-reset {
+      background: transparent;
+      border: 1.5px solid var(--mist);
+      color: var(--pine);
+      padding: 0.7rem 1.8rem;
+      font-family: 'Jost', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      border-radius: 3px;
+      transition: border-color 0.2s, background 0.2s;
+      margin-top: 0.5rem;
+    }
+
+    .btn-reset:hover { border-color: var(--pine); background: rgba(44,74,62,0.04); }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center;
+      padding: 2rem;
+      font-size: 0.73rem;
+      color: #aaa;
+      letter-spacing: 0.05em;
+    }
+
+    /* ── RESPONSIVE ── */
+
+    /* Tablet: 601px - 900px */
+    @media (min-width: 601px) and (max-width: 900px) {
+      .container { padding: 2rem 1.5rem 4rem; }
+      .hero { height: 300px; }
+      .hotel-grid { grid-template-columns: repeat(3, 1fr); gap: 0.65rem; }
+      .hotel-card img { height: 90px; }
+      .fields-grid { grid-template-columns: 1fr 1fr; gap: 1rem; }
+      .form-body { padding: 2rem; }
+      .form-card-header { padding: 1.5rem 2rem; }
+      .submit-row { flex-wrap: wrap; gap: 1rem; }
+      .btn-submit { flex: 1; justify-content: center; min-width: 180px; }
+      .privacy-note { flex: 1 1 100%; }
+    }
+
+    /* Mobile: max 600px */
+    @media (max-width: 600px) {
+      .container { padding: 1.25rem 0.85rem 3.5rem; }
+      .hero { height: 240px; }
+      .hero h1 { font-size: 2rem; }
+      .hero-subtitle { font-size: 0.78rem; flex-wrap: wrap; justify-content: center; }
+      .form-card-header { padding: 1.2rem 1.25rem; gap: 0.75rem; }
+      .form-card-header h2 { font-size: 1.25rem; }
+      .form-card-header svg { width: 22px; height: 22px; }
+      .form-body { padding: 1.25rem; }
+      .hotel-grid { grid-template-columns: 1fr 1fr; gap: 0.65rem; }
+      .hotel-card img { height: 80px; }
+      .hotel-card-label { font-size: 0.74rem; padding: 0.5rem 0.6rem; }
+      .fields-grid { grid-template-columns: 1fr; gap: 1rem; }
+      .field.full { grid-column: 1; }
+      input[type="text"], input[type="date"], select, textarea { font-size: 1rem; }
+      .submit-row { flex-direction: column; align-items: stretch; gap: 0.75rem; }
+      .btn-submit { justify-content: center; width: 100%; padding: 1rem; font-size: 0.85rem; }
+      .privacy-note { font-size: 0.7rem; text-align: center; max-width: 100%; }
+      .summary-box { font-size: 0.8rem; }
+      .success-screen { padding: 2.5rem 1.25rem; }
+      .success-screen h3 { font-size: 1.4rem; }
+    }
+
+    /* Very small phones: max 380px */
+    @media (max-width: 380px) {
+      .hotel-grid { grid-template-columns: 1fr; }
+      .hotel-card img { height: 100px; }
+    }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .form-card { animation: fadeUp 0.55s ease both; }
+    .hero-content > * { animation: fadeUp 0.5s ease both; }
+    .hero-content > *:nth-child(1) { animation-delay: 0.05s; }
+    .hero-content > *:nth-child(2) { animation-delay: 0.15s; }
+    .hero-content > *:nth-child(3) { animation-delay: 0.25s; }
+  </style>
+</head>
+<body>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-image-wrap">
+      <img src="Luggage Pick Up.png" alt="Luggage Pick Up" />
+    </div>
+    <div class="hero-content">
+      <div class="hero-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        Niseko Cluster
+      </div>
+      <h1>Luggage Pick-up</h1>
+      <div class="hero-subtitle">
+        <span>Available Daily</span>
+        <span class="dot"></span>
+        <span>6:00 AM – 12:00 PM</span>
+      </div>
+      <div class="hero-notice">
+        Please, schedule your luggage pick-up before 11:00 PM
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="container">
+    <div class="form-card">
+
+      <div class="form-card-header">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
+          <line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/>
+        </svg>
+        <div>
+          <h2>Luggage Pick-up</h2>
+          <p>Schedule your luggage collection</p>
+        </div>
+      </div>
+
+      <!-- FORM BODY -->
+      <div class="form-body" id="formBody">
+        <form id="luggageForm" novalidate>
+
+          <!-- HOTEL SELECTION -->
+          <div class="section-label">Select Hotel</div>
+          <div class="hotel-grid">
+
+            <label class="hotel-option">
+              <input type="radio" name="hotel" value="Hilton" />
+              <div class="hotel-card">
+                <img src="https://nisekocluster.com/wp-content/uploads/sites/91/2026/04/hnv-1.jpg" alt="Hilton Niseko Village" />
+                <div class="hotel-card-label">
+                  <span class="check"></span>
+                  Hilton
+                </div>
+              </div>
+            </label>
+
+            <label class="hotel-option">
+              <input type="radio" name="hotel" value="Hinode Hills" />
+              <div class="hotel-card">
+                <img src="https://nisekocluster.com/wp-content/uploads/sites/91/2026/04/hh-1.jpg" alt="Hinode Hills" />
+                <div class="hotel-card-label">
+                  <span class="check"></span>
+                  Hinode Hills
+                </div>
+              </div>
+            </label>
+
+            <label class="hotel-option">
+              <input type="radio" name="hotel" value="Green Leaf" />
+              <div class="hotel-card">
+                <img src="https://nisekocluster.com/wp-content/uploads/sites/91/2026/04/gl-1.jpg" alt="Green Leaf" />
+                <div class="hotel-card-label">
+                  <span class="check"></span>
+                  Green Leaf
+                </div>
+              </div>
+            </label>
+
+          </div>
+          <div class="hotel-error" id="hotelError">Please select a hotel.</div>
+
+          <hr class="divider" />
+
+          <!-- GUEST INFO -->
+          <div class="section-label">Guest Information</div>
+          <div class="fields-grid">
+
+            <div class="field full" id="fieldName">
+              <label for="guestName">Guest Name <span class="req">*</span></label>
+              <div class="input-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <input type="text" id="guestName" name="guestName" placeholder="Full Name" />
+              </div>
+              <span class="field-error">Please enter your full name.</span>
+            </div>
+
+            <div class="field" id="fieldRoom">
+              <label for="roomNumber">Room Number <span class="req">*</span></label>
+              <div class="input-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6v6H9z"/></svg>
+                <input type="text" id="roomNumber" name="roomNumber" placeholder="e.g. 412" />
+              </div>
+              <span class="field-error">Please enter your room number.</span>
+            </div>
+
+            <div class="field" id="fieldDate">
+              <label for="pickupDate">Pick-up Date <span class="req">*</span></label>
+              <div class="input-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                <input type="date" id="pickupDate" name="pickupDate" />
+              </div>
+              <span class="field-error">Please select a date.</span>
+            </div>
+
+            <div class="field" id="fieldTime">
+              <label for="pickupTime">Pick-up Time <span class="req">*</span></label>
+              <div class="input-wrap select-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                <select id="pickupTime" name="pickupTime">
+                  <option value="">Select time</option>
+                  <option>6:00 AM</option><option>6:15 AM</option><option>6:30 AM</option><option>6:45 AM</option>
+                  <option>7:00 AM</option><option>7:15 AM</option><option>7:30 AM</option><option>7:45 AM</option>
+                  <option>8:00 AM</option><option>8:15 AM</option><option>8:30 AM</option><option>8:45 AM</option>
+                  <option>9:00 AM</option><option>9:15 AM</option><option>9:30 AM</option><option>9:45 AM</option>
+                  <option>10:00 AM</option><option>10:15 AM</option><option>10:30 AM</option><option>10:45 AM</option>
+                  <option>11:00 AM</option><option>11:15 AM</option><option>11:30 AM</option><option>11:45 AM</option>
+                  <option>12:00 PM</option>
+                </select>
+              </div>
+              <span class="field-error">Please select a pick-up time.</span>
+            </div>
+
+            <div class="field" id="fieldItems">
+              <label for="numberOfItems">Number of Items <span class="req">*</span></label>
+              <div class="input-wrap select-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10H3M16 2l4 4-4 4M8 2L4 6l4 4"/><rect x="3" y="14" width="18" height="7" rx="1"/></svg>
+                <select id="numberOfItems" name="numberOfItems">
+                  <option value="">Select quantity</option>
+                  <option>1</option><option>2</option><option>3</option><option>4</option>
+                  <option>5</option><option>6</option><option>7</option><option>8</option>
+                  <option>9</option><option>10+</option>
+                </select>
+              </div>
+              <span class="field-error">Please select number of items.</span>
+            </div>
+
+            <div class="field full">
+              <label for="specialRequest">Special Request</label>
+              <div class="input-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="top:0.85rem;transform:none;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                <textarea id="specialRequest" name="specialRequest" placeholder="Any notes for our team…"></textarea>
+              </div>
+            </div>
+
+          </div>
+
+          <hr class="divider" />
+
+          <div class="submit-row">
+            <p class="privacy-note">Your information is handled securely and used only to coordinate your luggage pick-up.</p>
+            <button type="submit" class="btn-submit" id="submitBtn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              Confirm Request
+            </button>
+            <div class="closed-notice" id="closedNotice">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              Requests are accepted from <strong>8:00 AM to 11:00 PM</strong> Japan time. Please come back during service hours.
+            </div>
+          </div>
+
+        </form>
+      </div>
+
+      <!-- SUCCESS SCREEN -->
+      <div class="success-screen" id="successScreen">
+        <div class="success-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <h3>Request Confirmed</h3>
+        <p>Your luggage pick-up has been scheduled. Our team will be ready at your door.</p>
+        <div class="summary-box" id="summaryBox"></div>
+        <button class="btn-reset" id="resetBtn">Submit Another Request</button>
+      </div>
+
+    </div>
+  </div>
+
+  <footer>© 2026 Niseko Cluster · All rights reserved</footer>
+
+  <script>
+    const form = document.getElementById('luggageForm');
+    const formBody = document.getElementById('formBody');
+    const successScreen = document.getElementById('successScreen');
+    const summaryBox = document.getElementById('summaryBox');
+    const resetBtn = document.getElementById('resetBtn');
+    const hotelError = document.getElementById('hotelError');
+    const submitBtn = document.getElementById('submitBtn');
+    const closedNotice = document.getElementById('closedNotice');
+
+    // ── JAPAN TIME HELPERS ──
+    function nowInJapan() {
+      // Japan is UTC+9, no DST
+      const now = new Date();
+      const jst = new Date(now.getTime() + (9 * 60 * 60 * 1000));
+      return jst; // UTC date object shifted to JST
+    }
+
+    function getTomorrowJapan() {
+      const jst = nowInJapan();
+      // Move to next day
+      jst.setUTCDate(jst.getUTCDate() + 1);
+      // Return YYYY-MM-DD
+      return jst.toISOString().split('T')[0];
+    }
+
+    function isServiceOpen() {
+      const jst = nowInJapan();
+      const h = jst.getUTCHours();
+      const m = jst.getUTCMinutes();
+      const totalMinutes = h * 60 + m;
+      // Open: 08:00 (480) to 23:00 (1380)
+      return totalMinutes >= 480 && totalMinutes <= 1380;
+    }
+
+    function updateButtonState() {
+      const open = isServiceOpen();
+      submitBtn.disabled = !open;
+      closedNotice.classList.toggle('show', !open);
+    }
+
+    // Set min date to tomorrow (Japan time)
+    document.getElementById('pickupDate').min = getTomorrowJapan();
+
+    // Initial check
+    updateButtonState();
+
+    // Re-check every minute so the button unlocks/locks automatically
+    setInterval(updateButtonState, 60 * 1000);
+
+    function setError(fieldId, show) {
+      document.getElementById(fieldId)?.classList.toggle('error', show);
+    }
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      // Guard: reject if outside service hours (in case button was bypassed)
+      if (!isServiceOpen()) return;
+
+      let valid = true;
+
+      // Hotel
+      const hotel = document.querySelector('input[name="hotel"]:checked');
+      if (!hotel) {
+        hotelError.classList.add('show');
+        valid = false;
+      } else {
+        hotelError.classList.remove('show');
+      }
+
+      // Name
+      const name = document.getElementById('guestName').value.trim();
+      setError('fieldName', !name);
+      if (!name) valid = false;
+
+      // Room
+      const room = document.getElementById('roomNumber').value.trim();
+      setError('fieldRoom', !room);
+      if (!room) valid = false;
+
+      // Date
+      const date = document.getElementById('pickupDate').value;
+      setError('fieldDate', !date);
+      if (!date) valid = false;
+
+      // Time
+      const time = document.getElementById('pickupTime').value;
+      setError('fieldTime', !time);
+      if (!time) valid = false;
+
+      // Items
+      const items = document.getElementById('numberOfItems').value;
+      setError('fieldItems', !items);
+      if (!items) valid = false;
+
+      if (!valid) return;
+
+      // Build summary
+      const special = document.getElementById('specialRequest').value.trim();
+      const rows = [
+        { k: 'Hotel', v: hotel.value },
+        { k: 'Guest', v: name },
+        { k: 'Room', v: room },
+        { k: 'Date', v: date },
+        { k: 'Time', v: time },
+        { k: 'Items', v: items },
+      ];
+      if (special) rows.push({ k: 'Note', v: special });
+
+      summaryBox.innerHTML = rows.map(r =>
+        `<div class="row"><span class="k">${r.k}</span><span class="v">${r.v}</span></div>`
+      ).join('');
+
+      // ── RAILWAY API ──
+      // Set your Railway backend URL here (no trailing slash)
+      const API_URL = 'https://YOUR-APP.up.railway.app';
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Sending…';
+
+      const payload = {
+        hotel: hotel.value,
+        name:  name,
+        room:  room,
+        date:  date,
+        time:  time,
+        items: items,
+        special: special || ''
+      };
+
+      fetch(`${API_URL}/api/luggage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      })
+      .then(res => {
+        if (!res.ok) throw new Error('Server error ' + res.status);
+        return res.json();
+      })
+      .then(() => {
+        // Show success
+        formBody.classList.add('hidden');
+        successScreen.classList.add('show');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      })
+      .catch(err => {
+        console.error(err);
+        alert('Could not submit request. Please try again or contact the front desk.');
+      })
+      .finally(() => {
+        submitBtn.disabled = false;
+        updateButtonState();
+      });
+    });
+
+    // Live validation clear
+    document.getElementById('guestName').addEventListener('input', () => setError('fieldName', false));
+    document.getElementById('roomNumber').addEventListener('input', () => setError('fieldRoom', false));
+    document.getElementById('pickupDate').addEventListener('change', () => setError('fieldDate', false));
+    document.getElementById('pickupTime').addEventListener('change', () => setError('fieldTime', false));
+    document.getElementById('numberOfItems').addEventListener('change', () => setError('fieldItems', false));
+    document.querySelectorAll('input[name="hotel"]').forEach(r =>
+      r.addEventListener('change', () => hotelError.classList.remove('show'))
+    );
+
+    resetBtn.addEventListener('click', () => {
+      form.reset();
+      document.getElementById('pickupDate').min = getTomorrowJapan();
+      formBody.classList.remove('hidden');
+      successScreen.classList.remove('show');
+      hotelError.classList.remove('show');
+      ['fieldName','fieldRoom','fieldDate','fieldTime'].forEach(id => setError(id, false));
+      updateButtonState();
+    });
+  </script>
+</body>
+</html>
