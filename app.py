@@ -54,7 +54,8 @@ class LuggageRequest(db.Model):
 
 
 # ── CREATE TABLES ON FIRST START ──────────────────────
-with app.app_context():
+@app.before_request
+def create_tables():
     db.create_all()
 
 
