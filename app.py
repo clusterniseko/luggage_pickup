@@ -1,10 +1,69 @@
 import os
 import sys
 import logging
+import hmac
+import hashlib
+import time
+import base64
+from functools import wraps
 from datetime import datetime
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
+
+
+# ── AUTH HELPERS ──────────────────────────────────────
+
+def load_admin_users():
+    """Reads ADMIN_USERS env var. Format: 'Admin:pass1,Manager:pass2'"""
+    raw = os.environ.get("ADMIN_USERS", "")
+    users = {}
+    for pair in raw.split(","):
+        pair = pair.strip()
+        if ":" in pair:
+            username, password = pair.split(":", 1)
+            users[username.strip()] = password.strip()
+    return users
+
+
+def make_session_token(username: str) -> str:
+    """Creates a signed HMAC-SHA256 token: base64(username:timestamp:signature)"""
+    secret = os.environ.get("SECRET_KEY", "change-this-secret-in-railway")
+    ts = str(int(time.time()))
+    msg = f"{username}:{ts}"
+    sig = hmac.new(secret.encode(), msg.encode(), hashlib.sha256).hexdigest()
+    return base64.b64encode(f"{msg}:{sig}".encode()).decode()
+
+
+def verify_session_token(token: str):
+    """Returns username if token is valid and not expired (12h), else None."""
+    secret = os.environ.get("SECRET_KEY", "change-this-secret-in-railway")
+    try:
+        decoded = base64.b64decode(token.encode()).decode()
+        username, ts, sig = decoded.rsplit(":", 2)
+        msg = f"{username}:{ts}"
+        expected = hmac.new(secret.encode(), msg.encode(), hashlib.sha256).hexdigest()
+        if not hmac.compare_digest(sig, expected):
+            return None
+        if int(time.time()) - int(ts) > 43200:  # 12 hours
+            return None
+        return username
+    except Exception:
+        return None
+
+
+def require_admin(f):
+    """Decorator to protect routes — checks Authorization: Bearer <token>"""
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        auth_header = request.headers.get("Authorization", "")
+        token = auth_header.replace("Bearer ", "").strip()
+        if not token or not verify_session_token(token):
+            return jsonify({"error": "Unauthorized"}), 401
+        return f(*args, **kwargs)
+    return decorated
+
+
 
 # ── LOGGING ───────────────────────────────────────────
 logging.basicConfig(
@@ -201,6 +260,28 @@ def perm_delete():
     db.session.commit()
     return jsonify({"ok": True})
 
+
+
+# ── POST — admin login ────────────────────────────────
+@app.route("/api/auth/login", methods=["POST"])
+def auth_login():
+    data = request.get_json(silent=True) or {}
+    username = data.get("username", "").strip()
+    password = data.get("password", "")
+
+    if not username or not password:
+        return jsonify({"error": "Missing credentials"}), 400
+
+    users = load_admin_users()
+    stored = users.get(username, "")
+
+    if not stored or not hmac.compare_digest(stored, password):
+        time.sleep(0.5)  # slow down brute force
+        return jsonify({"error": "Invalid credentials"}), 401
+
+    token = make_session_token(username)
+    log.info(f"Admin login: {username}")
+    return jsonify({"token": token, "username": username}), 200
 
 # ── ENTRY POINT ───────────────────────────────────────
 # init_db() runs at module load — before gunicorn serves any traffic

@@ -5,6 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Admin — Luggage Requests | Niseko Cluster</title>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <style>
+    .flatpickr-calendar { font-family: 'Jost', sans-serif !important; border-radius: 4px !important; box-shadow: 0 8px 40px rgba(44,74,62,0.18) !important; border: 1px solid #e8e4de !important; }
+    .flatpickr-day.selected, .flatpickr-day.selected:hover { background: #2c4a3e !important; border-color: #2c4a3e !important; }
+    .flatpickr-day:hover { background: rgba(44,74,62,0.08) !important; }
+    .flatpickr-months .flatpickr-month { background: #2c4a3e !important; color: #fff !important; border-radius: 4px 4px 0 0 !important; }
+    .flatpickr-current-month { color: #fff !important; }
+    .flatpickr-weekday { color: #c4a96b !important; font-weight: 500 !important; }
+    .flatpickr-day.flatpickr-disabled { color: #ccc !important; }
+    .flatpickr-prev-month svg, .flatpickr-next-month svg { fill: #c4a96b !important; }
+  </style>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -646,11 +657,11 @@
           </div>
           <div class="export-field">
             <label>Pick-up Date From</label>
-            <input type="date" id="exportDateFrom" class="export-input"/>
+            <input type="text" id="exportDateFrom" class="export-input" placeholder="From date" readonly style="cursor:pointer;"/>
           </div>
           <div class="export-field">
             <label>Pick-up Date To</label>
-            <input type="date" id="exportDateTo" class="export-input"/>
+            <input type="text" id="exportDateTo" class="export-input" placeholder="To date" readonly style="cursor:pointer;"/>
           </div>
           <div class="export-actions">
             <button class="btn-export-all" onclick="exportCSV(false)">
@@ -693,7 +704,7 @@
           </select>
           <div class="date-filter-wrap">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-            <input type="date" id="filterDate" class="filter-date-input" oninput="renderTable()" title="Filter by pick-up date"/>
+            <input type="text" id="filterDate" class="filter-date-input" placeholder="Filter by date" readonly style="cursor:pointer;min-width:160px;" title="Filter by pick-up date"/>
             <button class="btn-clear-date" id="btnClearDate" onclick="clearDateFilter()" title="Clear date filter" style="display:none">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
@@ -795,40 +806,54 @@
 
   <div class="toast" id="toast"></div>
 
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
   <script>
-    // ── CREDENTIALS (change these) ──
-    const USERS = {
-      'admin':    'niseko2026',
-      'manager':  'cluster2026'
-    };
-
-    const AUTH_KEY  = 'luggage_admin_session';
+    const AUTH_KEY = 'luggage_admin_session';
 
     // ── RAILWAY API ──
     // Set your Railway backend URL here (no trailing slash)
-   const API_URL = 'https://luggagepickup-production.up.railway.app';
+    const API_URL = 'https://luggagepickup-production.up.railway.app';
 
     // ── AUTH ──
-    function doLogin() {
+    async function doLogin() {
       const user = document.getElementById('loginUser').value.trim();
       const pass = document.getElementById('loginPass').value;
       const err  = document.getElementById('loginError');
-      if (USERS[user] && USERS[user] === pass) {
-        sessionStorage.setItem(AUTH_KEY, user);
-        err.classList.remove('show');
-        document.getElementById('loginScreen').style.display = 'none';
-        document.getElementById('adminApp').classList.add('show');
-        document.getElementById('topbarUser').textContent = user;
-        loadAll();
-      } else {
+      const btn  = document.querySelector('.btn-login');
+      btn.disabled = true;
+      btn.textContent = 'Verifying…';
+      try {
+        const res = await fetch(`${API_URL}/api/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: user, password: pass })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          sessionStorage.setItem(AUTH_KEY, data.token || user);
+          sessionStorage.setItem('luggage_admin_user', user);
+          err.classList.remove('show');
+          document.getElementById('loginScreen').style.display = 'none';
+          document.getElementById('adminApp').classList.add('show');
+          document.getElementById('topbarUser').textContent = user;
+          loadAll();
+        } else {
+          err.classList.add('show');
+          document.getElementById('loginPass').value = '';
+          document.getElementById('loginPass').focus();
+        }
+      } catch(e) {
+        err.textContent = 'Connection error. Please try again.';
         err.classList.add('show');
-        document.getElementById('loginPass').value = '';
-        document.getElementById('loginPass').focus();
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg> Sign In';
       }
     }
 
     function doLogout() {
       sessionStorage.removeItem(AUTH_KEY);
+      sessionStorage.removeItem('luggage_admin_user');
       document.getElementById('adminApp').classList.remove('show');
       document.getElementById('loginScreen').style.display = 'flex';
       document.getElementById('loginUser').value = '';
@@ -843,18 +868,35 @@
 
     // Check session on load
     window.addEventListener('load', () => {
-      const saved = sessionStorage.getItem(AUTH_KEY);
-      if (saved && USERS[saved]) {
+      const token = sessionStorage.getItem(AUTH_KEY);
+      const savedUser = sessionStorage.getItem('luggage_admin_user');
+      if (token && savedUser) {
         document.getElementById('loginScreen').style.display = 'none';
         document.getElementById('adminApp').classList.add('show');
-        document.getElementById('topbarUser').textContent = saved;
+        document.getElementById('topbarUser').textContent = savedUser;
         loadAll();
       }
+      // Initialize flatpickr on date filters
+      filterDatePicker = flatpickr("#filterDate", {
+        dateFormat: "Y-m-d",
+        disableMobile: true,
+        onChange: function(dates, dateStr) {
+          renderTable();
+        }
+      });
+      exportDateFromPicker = flatpickr("#exportDateFrom", {
+        dateFormat: "Y-m-d",
+        disableMobile: true
+      });
+      exportDateToPicker = flatpickr("#exportDateTo", {
+        dateFormat: "Y-m-d",
+        disableMobile: true
+      });
     });
 
     // Auto-refresh from Railway every 30 seconds
     setInterval(() => {
-      if (sessionStorage.getItem(AUTH_KEY)) loadAll();
+      if (sessionStorage.getItem(AUTH_KEY) && sessionStorage.getItem('luggage_admin_user')) loadAll();
     }, 30000);
 
     // ── API STORAGE ──
@@ -1065,9 +1107,13 @@
       showToast(`${count} record${count !== 1 ? 's' : ''} moved to Trash`);
     }
 
+    // Flatpickr instances
+    let filterDatePicker, exportDateFromPicker, exportDateToPicker;
+
     // ── CLEAR DATE FILTER ──
     function clearDateFilter() {
-      document.getElementById('filterDate').value = '';
+      if (filterDatePicker) filterDatePicker.clear();
+      else document.getElementById('filterDate').value = '';
       renderTable();
     }
 
@@ -1220,8 +1266,8 @@
         if (to)    { records = records.filter(r => r.date <= to);   label += `-to-${to}`; }
         if (!records.length) { showToast('No records match selected filters'); return; }
       }
-      const headers = ['ID','Submitted At','Hotel','Guest Name','Room','Pick-up Date','Pick-up Time','Items','Special Request'];
-      const rows = records.map(r => [r.id, r.submittedAt, r.hotel, r.name, r.room, r.date, r.time, r.items, r.special || ''].map(v => `"${String(v).replace(/"/g,'""')}"`).join(','));
+      const headers = ['Hotel','Guest Name','Room','Pick-up Date','Pick-up Time','Items','Special Request'];
+      const rows = records.map(r => [r.hotel, r.name, r.room, r.date, r.time, r.items, r.special || ''].map(v => `"${String(v).replace(/"/g,'""')}"`).join(','));
       const csv  = [headers.join(','), ...rows].join('\n');
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
       const url  = URL.createObjectURL(blob);

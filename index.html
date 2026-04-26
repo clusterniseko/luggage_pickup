@@ -5,6 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Luggage Pick-up | Niseko Cluster</title>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <style>
+    .flatpickr-calendar { font-family: 'Jost', sans-serif !important; border-radius: 4px !important; box-shadow: 0 8px 40px rgba(44,74,62,0.18) !important; border: 1px solid #e8e4de !important; }
+    .flatpickr-day.selected, .flatpickr-day.selected:hover { background: #2c4a3e !important; border-color: #2c4a3e !important; }
+    .flatpickr-day:hover { background: rgba(44,74,62,0.08) !important; }
+    .flatpickr-months .flatpickr-month { background: #2c4a3e !important; color: #fff !important; border-radius: 4px 4px 0 0 !important; }
+    .flatpickr-current-month { color: #fff !important; }
+    .flatpickr-weekday { color: #c4a96b !important; font-weight: 500 !important; }
+    .flatpickr-day.flatpickr-disabled { color: #ccc !important; }
+    .flatpickr-prev-month svg, .flatpickr-next-month svg { fill: #c4a96b !important; }
+    .flatpickr-prev-month:hover svg, .flatpickr-next-month:hover svg { fill: #fff !important; }
+  </style>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -602,6 +614,7 @@
       .hotel-card img { height: 100px; }
     }
 
+    @keyframes spin { from { transform: translateY(-50%) rotate(0deg); } to { transform: translateY(-50%) rotate(360deg); } }
     /* ── ANIMATIONS ── */
     @keyframes fadeUp {
       from { opacity: 0; transform: translateY(20px); }
@@ -726,7 +739,7 @@
               <label for="pickupDate">Pick-up Date <span class="req">*</span></label>
               <div class="input-wrap">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                <input type="date" id="pickupDate" name="pickupDate" />
+                <input type="text" id="pickupDate" name="pickupDate" placeholder="Select date" readonly style="cursor:pointer;" />
               </div>
               <span class="field-error">Please select a date.</span>
             </div>
@@ -798,7 +811,7 @@
         <h3>Request Confirmed</h3>
         <p>Your luggage pick-up has been scheduled. Our team will be ready at your door.</p>
         <div class="summary-box" id="summaryBox"></div>
-        <button class="btn-reset" id="resetBtn">Submit Another Request</button>
+        <button class="btn-reset" id="resetBtn">Go Back Home</button>
       </div>
 
     </div>
@@ -806,6 +819,7 @@
 
   <footer>© 2026 Niseko Cluster · All rights reserved</footer>
 
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
   <script>
     const form = document.getElementById('luggageForm');
     const formBody = document.getElementById('formBody');
@@ -847,8 +861,13 @@
       closedNotice.classList.toggle('show', !open);
     }
 
-    // Set min date to tomorrow (Japan time)
-    document.getElementById('pickupDate').min = getTomorrowJapan();
+    // Initialize flatpickr on pickupDate — min date is tomorrow in Japan time
+    const datePicker = flatpickr("#pickupDate", {
+      dateFormat: "Y-m-d",
+      minDate: getTomorrowJapan(),
+      disableMobile: true,
+      onChange: function() { setError('fieldDate', false); }
+    });
 
     // Initial check
     updateButtonState();
@@ -922,10 +941,10 @@
 
       // ── RAILWAY API ──
       // Set your Railway backend URL here (no trailing slash)
-     const API_URL = 'https://luggagepickup-production.up.railway.app';
+      const API_URL = 'https://luggagepickup-production.up.railway.app';
 
       submitBtn.disabled = true;
-      submitBtn.textContent = 'Sending…';
+      submitBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;animation:spin 1s linear infinite"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Sending…';
 
       const payload = {
         hotel: hotel.value,
@@ -957,6 +976,7 @@
         alert('Could not submit request. Please try again or contact the front desk.');
       })
       .finally(() => {
+        submitBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><polyline points="20 6 9 17 4 12"/></svg> Confirm Request';
         submitBtn.disabled = false;
         updateButtonState();
       });
@@ -965,7 +985,7 @@
     // Live validation clear
     document.getElementById('guestName').addEventListener('input', () => setError('fieldName', false));
     document.getElementById('roomNumber').addEventListener('input', () => setError('fieldRoom', false));
-    document.getElementById('pickupDate').addEventListener('change', () => setError('fieldDate', false));
+    // date onChange handled by flatpickr init above
     document.getElementById('pickupTime').addEventListener('change', () => setError('fieldTime', false));
     document.getElementById('numberOfItems').addEventListener('change', () => setError('fieldItems', false));
     document.querySelectorAll('input[name="hotel"]').forEach(r =>
@@ -974,12 +994,14 @@
 
     resetBtn.addEventListener('click', () => {
       form.reset();
-      document.getElementById('pickupDate').min = getTomorrowJapan();
+      datePicker.clear();
+      datePicker.set('minDate', getTomorrowJapan());
       formBody.classList.remove('hidden');
       successScreen.classList.remove('show');
       hotelError.classList.remove('show');
       ['fieldName','fieldRoom','fieldDate','fieldTime'].forEach(id => setError(id, false));
       updateButtonState();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     });
   </script>
 </body>
