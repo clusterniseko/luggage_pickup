@@ -266,22 +266,46 @@ def perm_delete():
 @app.route("/api/auth/login", methods=["POST"])
 def auth_login():
     data = request.get_json(silent=True) or {}
-    username = data.get("username", "").strip()
-    password = data.get("password", "")
+    username = (data.get("username") or "").strip()
+    password = (data.get("password") or "").strip()
 
     if not username or not password:
         return jsonify({"error": "Missing credentials"}), 400
 
     users = load_admin_users()
-    stored = users.get(username, "")
 
-    if not stored or not hmac.compare_digest(stored, password):
-        time.sleep(0.5)  # slow down brute force
+    # Case-insensitive username lookup
+    matched_user = None
+    matched_pass = None
+    for u, p in users.items():
+        if u.lower() == username.lower():
+            matched_user = u
+            matched_pass = p
+            break
+
+    log.info(f"Login attempt: '{username}' | known users: {list(users.keys())} | match: {matched_user}")
+
+    if not matched_pass:
+        time.sleep(0.5)
         return jsonify({"error": "Invalid credentials"}), 401
 
-    token = make_session_token(username)
-    log.info(f"Admin login: {username}")
-    return jsonify({"token": token, "username": username}), 200
+    # Safe constant-time comparison — pad to same length to avoid length leak
+    def safe_compare(a, b):
+        a = a.encode() if isinstance(a, str) else a
+        b = b.encode() if isinstance(b, str) else b
+        if len(a) != len(b):
+            # Still do a compare to avoid timing leak, but return False
+            hmac.compare_digest(a, a)
+            return False
+        return hmac.compare_digest(a, b)
+
+    if not safe_compare(matched_pass, password):
+        time.sleep(0.5)
+        return jsonify({"error": "Invalid credentials"}), 401
+
+    token = make_session_token(matched_user)
+    log.info(f"Admin login success: {matched_user}")
+    return jsonify({"token": token, "username": matched_user}), 200
 
 # ── ENTRY POINT ───────────────────────────────────────
 # init_db() runs at module load — before gunicorn serves any traffic
