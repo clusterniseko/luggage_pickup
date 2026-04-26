@@ -1,21 +1,42 @@
 import os
+import sys
+import logging
 from datetime import datetime
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 
+# ── LOGGING ───────────────────────────────────────────
+logging.basicConfig(
+    stream=sys.stdout,
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s"
+)
+log = logging.getLogger(__name__)
+
 app = Flask(__name__)
-CORS(app)  # Allow requests from any frontend origin
+CORS(app)
 
 # ── DATABASE ──────────────────────────────────────────
-# Railway injects DATABASE_URL automatically.
-# SQLAlchemy requires "postgresql://" not "postgres://"
-DATABASE_URL = os.environ.get("DATABASE_URL", "sqlite:///luggage.db")
-if DATABASE_URL.startswith("postgres://"):
+DATABASE_URL = os.environ.get("DATABASE_URL", "")
+
+if not DATABASE_URL:
+    log.warning("DATABASE_URL not set — falling back to local SQLite")
+    DATABASE_URL = "sqlite:///luggage.db"
+elif DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+
+log.info(f"Using database: {DATABASE_URL[:40]}...")
 
 app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URL
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
+    "pool_pre_ping": True,
+    "pool_recycle": 300,
+    "connect_args": {} if DATABASE_URL.startswith("sqlite") else {
+        "connect_timeout": 10
+    }
+}
 
 db = SQLAlchemy(app)
 
@@ -29,11 +50,11 @@ class LuggageRequest(db.Model):
     hotel        = db.Column(db.String(100), nullable=False)
     name         = db.Column(db.String(200), nullable=False)
     room         = db.Column(db.String(50),  nullable=False)
-    date         = db.Column(db.String(20),  nullable=False)   # YYYY-MM-DD
-    time         = db.Column(db.String(20),  nullable=False)   # e.g. "9:00 AM"
-    items        = db.Column(db.String(20),  nullable=False)   # e.g. "3" or "10+"
+    date         = db.Column(db.String(20),  nullable=False)
+    time         = db.Column(db.String(20),  nullable=False)
+    items        = db.Column(db.String(20),  nullable=False)
     special      = db.Column(db.Text,        default="")
-    trashed      = db.Column(db.Boolean,     default=False,    nullable=False)
+    trashed      = db.Column(db.Boolean,     default=False, nullable=False)
     deleted_at   = db.Column(db.DateTime,    nullable=True)
 
     def to_dict(self, include_deleted=False):
@@ -53,16 +74,39 @@ class LuggageRequest(db.Model):
         return d
 
 
-# ── CREATE TABLES ON FIRST START ──────────────────────
-@app.before_request
-def create_tables():
-    db.create_all()
+# ── INIT DB ───────────────────────────────────────────
+def init_db():
+    try:
+        with app.app_context():
+            db.create_all()
+            count = db.session.execute(
+                db.text("SELECT COUNT(*) FROM luggage_requests")
+            ).scalar()
+            log.info(f"✅ Table 'luggage_requests' ready. Current rows: {count}")
+    except Exception as e:
+        log.error(f"❌ Failed to init database: {e}")
+        raise
 
 
 # ── HEALTH CHECK ──────────────────────────────────────
 @app.route("/", methods=["GET"])
 def health():
-    return jsonify({"status": "ok", "service": "Niseko Luggage API"}), 200
+    try:
+        count = db.session.execute(
+            db.text("SELECT COUNT(*) FROM luggage_requests")
+        ).scalar()
+        return jsonify({
+            "status": "ok",
+            "service": "Niseko Luggage API",
+            "db": "connected",
+            "records": count
+        }), 200
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "db": "failed",
+            "detail": str(e)
+        }), 500
 
 
 # ── GET — active records ──────────────────────────────
@@ -98,6 +142,7 @@ def create_luggage():
     )
     db.session.add(record)
     db.session.commit()
+    log.info(f"New request: {record.name} / Room {record.room} / {record.hotel}")
     return jsonify({"id": record.id}), 201
 
 
@@ -116,7 +161,7 @@ def get_trash():
 # ── POST — move to trash ──────────────────────────────
 @app.route("/api/luggage/trash", methods=["POST"])
 def move_to_trash():
-    ids = request.get_json(silent=True).get("ids", [])
+    ids = (request.get_json(silent=True) or {}).get("ids", [])
     if not ids:
         return jsonify({"error": "No ids provided"}), 400
 
@@ -131,7 +176,7 @@ def move_to_trash():
 # ── POST — restore from trash ─────────────────────────
 @app.route("/api/luggage/restore", methods=["POST"])
 def restore_from_trash():
-    ids = request.get_json(silent=True).get("ids", [])
+    ids = (request.get_json(silent=True) or {}).get("ids", [])
     if not ids:
         return jsonify({"error": "No ids provided"}), 400
 
@@ -146,7 +191,7 @@ def restore_from_trash():
 # ── DELETE — permanent delete ─────────────────────────
 @app.route("/api/luggage/permanent", methods=["DELETE"])
 def perm_delete():
-    ids = request.get_json(silent=True).get("ids", [])
+    ids = (request.get_json(silent=True) or {}).get("ids", [])
     if not ids:
         return jsonify({"error": "No ids provided"}), 400
 
@@ -157,7 +202,10 @@ def perm_delete():
     return jsonify({"ok": True})
 
 
-# ── RUN ───────────────────────────────────────────────
+# ── ENTRY POINT ───────────────────────────────────────
+# init_db() runs at module load — before gunicorn serves any traffic
+init_db()
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=False)
