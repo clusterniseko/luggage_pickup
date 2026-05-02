@@ -568,12 +568,64 @@
       letter-spacing: 0.05em;
     }
 
+    /* ── LANGUAGE SWITCHER ── */
+    .lang-switcher {
+      position: absolute;
+      top: 1.25rem;
+      right: 1.5rem;
+      z-index: 5;
+      display: inline-flex;
+      gap: 0.5rem;
+      background: rgba(0,0,0,0.18);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      padding: 0.4rem;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .lang-btn {
+      font-family: 'Jost', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      color: rgba(255,255,255,0.75);
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 6px;
+      padding: 0.4rem 0.85rem;
+      cursor: pointer;
+      transition: background 0.18s, color 0.18s, border-color 0.18s, transform 0.15s;
+      min-width: 44px;
+      line-height: 1;
+    }
+
+    .lang-btn:hover {
+      color: var(--white);
+      border-color: rgba(255,255,255,0.4);
+      background: rgba(255,255,255,0.05);
+    }
+
+    .lang-btn.active {
+      background: var(--gold);
+      color: #1a1a1a;
+      border-color: var(--gold);
+      font-weight: 600;
+      box-shadow: 0 2px 12px rgba(196,169,107,0.35);
+    }
+
+    .lang-btn.active:hover {
+      background: #d4ba7e;
+      border-color: #d4ba7e;
+    }
+
     /* ── RESPONSIVE ── */
 
     /* Tablet: 601px - 900px */
     @media (min-width: 601px) and (max-width: 900px) {
       .container { padding: 2rem 1.5rem 4rem; }
       .hero { height: 300px; }
+      .lang-switcher { top: 1rem; right: 1rem; }
       .hotel-grid { grid-template-columns: repeat(3, 1fr); gap: 0.65rem; }
       .hotel-card img { height: 90px; }
       .fields-grid { grid-template-columns: 1fr 1fr; gap: 1rem; }
@@ -589,6 +641,17 @@
       .container { padding: 1.25rem 0.85rem 3.5rem; }
       .hero { height: 240px; }
       .hero h1 { font-size: 2rem; }
+      .lang-switcher {
+        top: 0.65rem;
+        right: 0.65rem;
+        gap: 0.3rem;
+        padding: 0.3rem;
+      }
+      .lang-btn {
+        font-size: 0.72rem;
+        padding: 0.32rem 0.6rem;
+        min-width: 36px;
+      }
       .hero-subtitle { font-size: 0.78rem; flex-wrap: wrap; justify-content: center; }
       .form-card-header { padding: 1.2rem 1.25rem; gap: 0.75rem; }
       .form-card-header h2 { font-size: 1.25rem; }
@@ -632,21 +695,27 @@
 
   <!-- HERO -->
   <div class="hero">
+    <div class="lang-switcher" role="group" aria-label="Language">
+      <button type="button" class="lang-btn active" data-lang="en">EN</button>
+      <button type="button" class="lang-btn" data-lang="ja">日本語</button>
+      <button type="button" class="lang-btn" data-lang="ko">한국어</button>
+      <button type="button" class="lang-btn" data-lang="zh">中文</button>
+    </div>
     <div class="hero-image-wrap">
       <img src="Luggage Pick Up.png" alt="Luggage Pick Up" />
     </div>
     <div class="hero-content">
       <div class="hero-badge">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-        Niseko Cluster
+        <span data-i18n="brand">Niseko Cluster</span>
       </div>
-      <h1>Luggage Pick-up</h1>
+      <h1 data-i18n="heroTitle">Luggage Pick-up</h1>
       <div class="hero-subtitle">
-        <span>Available Daily</span>
+        <span data-i18n="heroAvailable">Available Daily</span>
         <span class="dot"></span>
-        <span>6:00 AM – 12:00 PM</span>
+        <span data-i18n="heroHours">6:00 AM – 12:00 PM</span>
       </div>
-      <div class="hero-notice">
+      <div class="hero-notice" data-i18n="heroNotice">
         Please, schedule your luggage pick-up before 11:00 PM
       </div>
     </div>
@@ -662,8 +731,8 @@
           <line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/>
         </svg>
         <div>
-          <h2>Luggage Pick-up</h2>
-          <p>Schedule your luggage collection</p>
+          <h2 data-i18n="cardTitle">Luggage Pick-up</h2>
+          <p data-i18n="cardSubtitle">Schedule your luggage collection</p>
         </div>
       </div>
 
@@ -672,7 +741,7 @@
         <form id="luggageForm" novalidate>
 
           <!-- HOTEL SELECTION -->
-          <div class="section-label">Select Hotel</div>
+          <div class="section-label" data-i18n="sectionHotel">Select Hotel</div>
           <div class="hotel-grid">
 
             <label class="hotel-option">
@@ -709,47 +778,47 @@
             </label>
 
           </div>
-          <div class="hotel-error" id="hotelError">Please select a hotel.</div>
+          <div class="hotel-error" id="hotelError" data-i18n="errHotel">Please select a hotel.</div>
 
           <hr class="divider" />
 
           <!-- GUEST INFO -->
-          <div class="section-label">Guest Information</div>
+          <div class="section-label" data-i18n="sectionGuest">Guest Information</div>
           <div class="fields-grid">
 
             <div class="field full" id="fieldName">
-              <label for="guestName">Guest Name <span class="req">*</span></label>
+              <label for="guestName"><span data-i18n="lblName">Guest Name</span> <span class="req">*</span></label>
               <div class="input-wrap">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                <input type="text" id="guestName" name="guestName" placeholder="Full Name" />
+                <input type="text" id="guestName" name="guestName" placeholder="Full Name" data-i18n-placeholder="phName" />
               </div>
-              <span class="field-error">Please enter your full name.</span>
+              <span class="field-error" data-i18n="errName">Please enter your full name.</span>
             </div>
 
             <div class="field" id="fieldRoom">
-              <label for="roomNumber">Room Number <span class="req">*</span></label>
+              <label for="roomNumber"><span data-i18n="lblRoom">Room Number</span> <span class="req">*</span></label>
               <div class="input-wrap">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6v6H9z"/></svg>
-                <input type="text" id="roomNumber" name="roomNumber" placeholder="e.g. 412" />
+                <input type="text" id="roomNumber" name="roomNumber" placeholder="e.g. 412" data-i18n-placeholder="phRoom" />
               </div>
-              <span class="field-error">Please enter your room number.</span>
+              <span class="field-error" data-i18n="errRoom">Please enter your room number.</span>
             </div>
 
             <div class="field" id="fieldDate">
-              <label for="pickupDate">Pick-up Date <span class="req">*</span></label>
+              <label for="pickupDate"><span data-i18n="lblDate">Pick-up Date</span> <span class="req">*</span></label>
               <div class="input-wrap">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                <input type="text" id="pickupDate" name="pickupDate" placeholder="Select date" readonly style="cursor:pointer;" />
+                <input type="text" id="pickupDate" name="pickupDate" placeholder="Select date" data-i18n-placeholder="phDate" readonly style="cursor:pointer;" />
               </div>
-              <span class="field-error">Please select a date.</span>
+              <span class="field-error" data-i18n="errDate">Please select a date.</span>
             </div>
 
             <div class="field" id="fieldTime">
-              <label for="pickupTime">Pick-up Time <span class="req">*</span></label>
+              <label for="pickupTime"><span data-i18n="lblTime">Pick-up Time</span> <span class="req">*</span></label>
               <div class="input-wrap select-wrap">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                 <select id="pickupTime" name="pickupTime">
-                  <option value="">Select time</option>
+                  <option value="" data-i18n="phTime">Select time</option>
                   <option>6:00 AM</option><option>6:15 AM</option><option>6:30 AM</option><option>6:45 AM</option>
                   <option>7:00 AM</option><option>7:15 AM</option><option>7:30 AM</option><option>7:45 AM</option>
                   <option>8:00 AM</option><option>8:15 AM</option><option>8:30 AM</option><option>8:45 AM</option>
@@ -759,28 +828,28 @@
                   <option>12:00 PM</option>
                 </select>
               </div>
-              <span class="field-error">Please select a pick-up time.</span>
+              <span class="field-error" data-i18n="errTime">Please select a pick-up time.</span>
             </div>
 
             <div class="field" id="fieldItems">
-              <label for="numberOfItems">Number of Items <span class="req">*</span></label>
+              <label for="numberOfItems"><span data-i18n="lblItems">Number of Items</span> <span class="req">*</span></label>
               <div class="input-wrap select-wrap">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10H3M16 2l4 4-4 4M8 2L4 6l4 4"/><rect x="3" y="14" width="18" height="7" rx="1"/></svg>
                 <select id="numberOfItems" name="numberOfItems">
-                  <option value="">Select quantity</option>
+                  <option value="" data-i18n="phItems">Select quantity</option>
                   <option>1</option><option>2</option><option>3</option><option>4</option>
                   <option>5</option><option>6</option><option>7</option><option>8</option>
                   <option>9</option><option>10+</option>
                 </select>
               </div>
-              <span class="field-error">Please select number of items.</span>
+              <span class="field-error" data-i18n="errItems">Please select number of items.</span>
             </div>
 
             <div class="field full">
-              <label for="specialRequest">Special Request</label>
+              <label for="specialRequest" data-i18n="lblSpecial">Special Request</label>
               <div class="input-wrap">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="top:0.85rem;transform:none;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                <textarea id="specialRequest" name="specialRequest" placeholder="Any notes for our team…"></textarea>
+                <textarea id="specialRequest" name="specialRequest" placeholder="Any notes for our team…" data-i18n-placeholder="phSpecial"></textarea>
               </div>
             </div>
 
@@ -789,14 +858,14 @@
           <hr class="divider" />
 
           <div class="submit-row">
-            <p class="privacy-note">Your information is handled securely and used only to coordinate your luggage pick-up.</p>
+            <p class="privacy-note" data-i18n="privacy">Your information is handled securely and used only to coordinate your luggage pick-up.</p>
             <button type="submit" class="btn-submit" id="submitBtn">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-              Confirm Request
+              <span data-i18n="btnSubmit">Confirm Request</span>
             </button>
             <div class="closed-notice" id="closedNotice">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-              Requests are accepted from <strong>8:00 AM to 11:00 PM</strong> Japan time. Please come back during service hours.
+              <span data-i18n-html="closedNotice">Requests are accepted from <strong>8:00 AM to 11:00 PM</strong> Japan time. Please come back during service hours.</span>
             </div>
           </div>
 
@@ -808,19 +877,227 @@
         <div class="success-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
         </div>
-        <h3>Request Confirmed</h3>
-        <p>Your luggage pick-up has been scheduled. Our team will be ready at your door.</p>
+        <h3 data-i18n="successTitle">Request Confirmed</h3>
+        <p data-i18n="successMsg">Your luggage pick-up has been scheduled. Our team will be ready at your door.</p>
         <div class="summary-box" id="summaryBox"></div>
-        <button class="btn-reset" id="resetBtn">Back to Home</button>
+        <button class="btn-reset" id="resetBtn" data-i18n="btnReset">Back to Home</button>
       </div>
 
     </div>
   </div>
 
-  <footer>© 2026 Niseko Cluster · All rights reserved</footer>
+  <footer data-i18n="footer">© 2026 Niseko Cluster · All rights reserved</footer>
 
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
   <script>
+    // ── TRANSLATIONS ──
+    const I18N = {
+      en: {
+        brand: 'Niseko Cluster',
+        heroTitle: 'Luggage Pick-up',
+        heroAvailable: 'Available Daily',
+        heroHours: '6:00 AM – 12:00 PM',
+        heroNotice: 'Please, schedule your luggage pick-up before 11:00 PM',
+        cardTitle: 'Luggage Pick-up',
+        cardSubtitle: 'Schedule your luggage collection',
+        sectionHotel: 'Select Hotel',
+        sectionGuest: 'Guest Information',
+        lblName: 'Guest Name',
+        lblRoom: 'Room Number',
+        lblDate: 'Pick-up Date',
+        lblTime: 'Pick-up Time',
+        lblItems: 'Number of Items',
+        lblSpecial: 'Special Request',
+        phName: 'Full Name',
+        phRoom: 'e.g. 412',
+        phDate: 'Select date',
+        phTime: 'Select time',
+        phItems: 'Select quantity',
+        phSpecial: 'Any notes for our team…',
+        errHotel: 'Please select a hotel.',
+        errName: 'Please enter your full name.',
+        errRoom: 'Please enter your room number.',
+        errDate: 'Please select a date.',
+        errTime: 'Please select a pick-up time.',
+        errItems: 'Please select number of items.',
+        privacy: 'Your information is handled securely and used only to coordinate your luggage pick-up.',
+        btnSubmit: 'Confirm Request',
+        btnSending: 'Sending…',
+        closedNotice: 'Requests are accepted from <strong>8:00 AM to 11:00 PM</strong> Japan time. Please come back during service hours.',
+        successTitle: 'Request Confirmed',
+        successMsg: 'Your luggage pick-up has been scheduled. Our team will be ready at your door.',
+        btnReset: 'Back to Home',
+        footer: '© 2026 Niseko Cluster · All rights reserved',
+        sumHotel: 'Hotel', sumGuest: 'Guest', sumRoom: 'Room',
+        sumDate: 'Date', sumTime: 'Time', sumItems: 'Items', sumNote: 'Note',
+        submitFail: 'Could not submit request. Please try again or contact the front desk.'
+      },
+      ja: {
+        brand: 'ニセコクラスター',
+        heroTitle: '手荷物お預かり',
+        heroAvailable: '毎日受付',
+        heroHours: '午前6:00 – 午後12:00',
+        heroNotice: '手荷物のお預かりは午後11:00までにご予約ください',
+        cardTitle: '手荷物お預かり',
+        cardSubtitle: '手荷物の集荷をご予約ください',
+        sectionHotel: 'ホテルを選択',
+        sectionGuest: 'お客様情報',
+        lblName: 'お名前',
+        lblRoom: 'お部屋番号',
+        lblDate: '集荷日',
+        lblTime: '集荷時間',
+        lblItems: '荷物の個数',
+        lblSpecial: 'ご要望',
+        phName: 'フルネーム',
+        phRoom: '例: 412',
+        phDate: '日付を選択',
+        phTime: '時間を選択',
+        phItems: '個数を選択',
+        phSpecial: 'スタッフへのご要望があればご記入ください…',
+        errHotel: 'ホテルを選択してください。',
+        errName: 'お名前を入力してください。',
+        errRoom: 'お部屋番号を入力してください。',
+        errDate: '日付を選択してください。',
+        errTime: '集荷時間を選択してください。',
+        errItems: '荷物の個数を選択してください。',
+        privacy: 'お客様の情報は安全に管理され、手荷物集荷の手配にのみ使用されます。',
+        btnSubmit: 'リクエストを確定',
+        btnSending: '送信中…',
+        closedNotice: 'ご予約は日本時間の<strong>午前8:00から午後11:00</strong>まで受け付けております。営業時間内に再度お試しください。',
+        successTitle: 'リクエストを承りました',
+        successMsg: '手荷物の集荷を承りました。スタッフがお部屋までお伺いいたします。',
+        btnReset: 'ホームに戻る',
+        footer: '© 2026 ニセコクラスター · 無断複写・転載を禁じます',
+        sumHotel: 'ホテル', sumGuest: 'お客様', sumRoom: 'お部屋',
+        sumDate: '日付', sumTime: '時間', sumItems: '個数', sumNote: '備考',
+        submitFail: 'リクエストを送信できませんでした。再度お試しいただくか、フロントデスクまでご連絡ください。'
+      },
+      ko: {
+        brand: '니세코 클러스터',
+        heroTitle: '수하물 픽업',
+        heroAvailable: '매일 이용 가능',
+        heroHours: '오전 6:00 – 오후 12:00',
+        heroNotice: '수하물 픽업은 오후 11:00 이전에 예약해 주세요',
+        cardTitle: '수하물 픽업',
+        cardSubtitle: '수하물 수거를 예약하세요',
+        sectionHotel: '호텔 선택',
+        sectionGuest: '고객 정보',
+        lblName: '성함',
+        lblRoom: '객실 번호',
+        lblDate: '픽업 날짜',
+        lblTime: '픽업 시간',
+        lblItems: '수하물 개수',
+        lblSpecial: '요청 사항',
+        phName: '성명',
+        phRoom: '예: 412',
+        phDate: '날짜 선택',
+        phTime: '시간 선택',
+        phItems: '개수 선택',
+        phSpecial: '저희 팀에 전달할 메모가 있으면 입력해 주세요…',
+        errHotel: '호텔을 선택해 주세요.',
+        errName: '성함을 입력해 주세요.',
+        errRoom: '객실 번호를 입력해 주세요.',
+        errDate: '날짜를 선택해 주세요.',
+        errTime: '픽업 시간을 선택해 주세요.',
+        errItems: '수하물 개수를 선택해 주세요.',
+        privacy: '귀하의 정보는 안전하게 관리되며 수하물 픽업 조율 목적으로만 사용됩니다.',
+        btnSubmit: '요청 확정',
+        btnSending: '전송 중…',
+        closedNotice: '요청은 일본 시간 기준 <strong>오전 8:00부터 오후 11:00까지</strong> 접수됩니다. 영업 시간 내에 다시 시도해 주세요.',
+        successTitle: '요청이 확정되었습니다',
+        successMsg: '수하물 픽업이 예약되었습니다. 저희 팀이 객실 앞에서 대기하겠습니다.',
+        btnReset: '홈으로 돌아가기',
+        footer: '© 2026 니세코 클러스터 · 모든 권리 보유',
+        sumHotel: '호텔', sumGuest: '고객', sumRoom: '객실',
+        sumDate: '날짜', sumTime: '시간', sumItems: '개수', sumNote: '메모',
+        submitFail: '요청을 전송하지 못했습니다. 다시 시도하시거나 프런트 데스크에 문의해 주세요.'
+      },
+      zh: {
+        brand: '二世谷集群',
+        heroTitle: '行李收取',
+        heroAvailable: '每日服务',
+        heroHours: '上午6:00 – 下午12:00',
+        heroNotice: '请于晚上11:00前预约行李收取',
+        cardTitle: '行李收取',
+        cardSubtitle: '预约您的行李收取',
+        sectionHotel: '选择酒店',
+        sectionGuest: '宾客信息',
+        lblName: '宾客姓名',
+        lblRoom: '房间号',
+        lblDate: '收取日期',
+        lblTime: '收取时间',
+        lblItems: '行李件数',
+        lblSpecial: '特殊要求',
+        phName: '全名',
+        phRoom: '例: 412',
+        phDate: '选择日期',
+        phTime: '选择时间',
+        phItems: '选择数量',
+        phSpecial: '请留下任何需要告知我们团队的备注…',
+        errHotel: '请选择酒店。',
+        errName: '请输入您的全名。',
+        errRoom: '请输入您的房间号。',
+        errDate: '请选择日期。',
+        errTime: '请选择收取时间。',
+        errItems: '请选择行李件数。',
+        privacy: '您的信息将被安全处理,仅用于安排行李收取。',
+        btnSubmit: '确认请求',
+        btnSending: '发送中…',
+        closedNotice: '我们于日本时间<strong>上午8:00至晚上11:00</strong>接受请求。请在服务时间内再次尝试。',
+        successTitle: '请求已确认',
+        successMsg: '您的行李收取已预约。我们的团队将在您的门前准备就绪。',
+        btnReset: '返回首页',
+        footer: '© 2026 二世谷集群 · 版权所有',
+        sumHotel: '酒店', sumGuest: '宾客', sumRoom: '房间',
+        sumDate: '日期', sumTime: '时间', sumItems: '件数', sumNote: '备注',
+        submitFail: '无法提交请求。请重试或联系前台。'
+      }
+    };
+
+    const HTML_LANG = { en: 'en', ja: 'ja', ko: 'ko', zh: 'zh' };
+
+    let currentLang = sessionStorage.getItem('niseko_lang') || 'en';
+
+    function applyLang(lang) {
+      const dict = I18N[lang] || I18N.en;
+      currentLang = lang;
+      try { sessionStorage.setItem('niseko_lang', lang); } catch (e) {}
+      document.documentElement.setAttribute('lang', HTML_LANG[lang] || 'en');
+
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (dict[key] !== undefined) el.textContent = dict[key];
+      });
+      document.querySelectorAll('[data-i18n-html]').forEach(el => {
+        const key = el.getAttribute('data-i18n-html');
+        if (dict[key] !== undefined) el.innerHTML = dict[key];
+      });
+      document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+        const key = el.getAttribute('data-i18n-placeholder');
+        if (dict[key] !== undefined) el.setAttribute('placeholder', dict[key]);
+      });
+
+      // Active button state
+      document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-lang') === lang);
+      });
+
+      // Update flatpickr locale-ish placeholder & redraw
+      const dateInput = document.getElementById('pickupDate');
+      if (dateInput && dateInput._flatpickr) {
+        dateInput._flatpickr.set('locale', { firstDayOfWeek: 0 });
+      }
+    }
+
+    // Wire up language buttons
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+      btn.addEventListener('click', () => applyLang(btn.getAttribute('data-lang')));
+    });
+
+    function t(key) {
+      return (I18N[currentLang] && I18N[currentLang][key]) || I18N.en[key] || key;
+    }
+
     const form = document.getElementById('luggageForm');
     const formBody = document.getElementById('formBody');
     const successScreen = document.getElementById('successScreen');
@@ -871,6 +1148,9 @@
 
     // Initial check
     updateButtonState();
+
+    // Apply saved language on load
+    applyLang(currentLang);
 
     // Re-check every minute so the button unlocks/locks automatically
     setInterval(updateButtonState, 60 * 1000);
@@ -926,14 +1206,14 @@
       // Build summary
       const special = document.getElementById('specialRequest').value.trim();
       const rows = [
-        { k: 'Hotel', v: hotel.value },
-        { k: 'Guest', v: name },
-        { k: 'Room', v: room },
-        { k: 'Date', v: date },
-        { k: 'Time', v: time },
-        { k: 'Items', v: items },
+        { k: t('sumHotel'), v: hotel.value },
+        { k: t('sumGuest'), v: name },
+        { k: t('sumRoom'),  v: room },
+        { k: t('sumDate'),  v: date },
+        { k: t('sumTime'),  v: time },
+        { k: t('sumItems'), v: items },
       ];
-      if (special) rows.push({ k: 'Note', v: special });
+      if (special) rows.push({ k: t('sumNote'), v: special });
 
       summaryBox.innerHTML = rows.map(r =>
         `<div class="row"><span class="k">${r.k}</span><span class="v">${r.v}</span></div>`
@@ -944,7 +1224,7 @@
       const API_URL = 'https://luggagepickup-production.up.railway.app';
 
       submitBtn.disabled = true;
-      submitBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;animation:spin 1s linear infinite"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Sending…';
+      submitBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;animation:spin 1s linear infinite"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> ' + t('btnSending');
 
       const payload = {
         hotel: hotel.value,
@@ -973,10 +1253,10 @@
       })
       .catch(err => {
         console.error(err);
-        alert('Could not submit request. Please try again or contact the front desk.');
+        alert(t('submitFail'));
       })
       .finally(() => {
-        submitBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><polyline points="20 6 9 17 4 12"/></svg> Confirm Request';
+        submitBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><polyline points="20 6 9 17 4 12"/></svg> <span data-i18n="btnSubmit">' + t('btnSubmit') + '</span>';
         submitBtn.disabled = false;
         updateButtonState();
       });
