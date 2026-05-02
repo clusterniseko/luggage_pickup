@@ -642,15 +642,18 @@
       .hero { height: 240px; }
       .hero h1 { font-size: 2rem; }
       .lang-switcher {
-        top: 0.65rem;
-        right: 0.65rem;
-        gap: 0.3rem;
-        padding: 0.3rem;
+        top: 0.55rem;
+        right: 0.55rem;
+        gap: 0.2rem;
+        padding: 0.22rem;
+        border-radius: 6px;
       }
       .lang-btn {
-        font-size: 0.72rem;
-        padding: 0.32rem 0.6rem;
-        min-width: 36px;
+        font-size: 0.62rem;
+        padding: 0.22rem 0.45rem;
+        min-width: 28px;
+        border-radius: 4px;
+        letter-spacing: 0.02em;
       }
       .hero-subtitle { font-size: 0.78rem; flex-wrap: wrap; justify-content: center; }
       .form-card-header { padding: 1.2rem 1.25rem; gap: 0.75rem; }
@@ -675,6 +678,11 @@
     @media (max-width: 380px) {
       .hotel-grid { grid-template-columns: 1fr; }
       .hotel-card img { height: 100px; }
+      .lang-btn {
+        font-size: 0.58rem;
+        padding: 0.2rem 0.38rem;
+        min-width: 24px;
+      }
     }
 
     @keyframes spin { from { transform: translateY(-50%) rotate(0deg); } to { transform: translateY(-50%) rotate(360deg); } }
@@ -886,7 +894,7 @@
     </div>
   </div>
 
-  <footer data-i18n="footer">© 2026 Niseko Cluster · All rights reserved</footer>
+  <footer>© 2026 Niseko Cluster · All rights reserved</footer>
 
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
   <script>
@@ -927,7 +935,6 @@
         successTitle: 'Request Confirmed',
         successMsg: 'Your luggage pick-up has been scheduled. Our team will be ready at your door.',
         btnReset: 'Back to Home',
-        footer: '© 2026 Niseko Cluster · All rights reserved',
         sumHotel: 'Hotel', sumGuest: 'Guest', sumRoom: 'Room',
         sumDate: 'Date', sumTime: 'Time', sumItems: 'Items', sumNote: 'Note',
         submitFail: 'Could not submit request. Please try again or contact the front desk.'
@@ -967,7 +974,6 @@
         successTitle: 'リクエストを承りました',
         successMsg: '手荷物の集荷を承りました。スタッフがお部屋までお伺いいたします。',
         btnReset: 'ホームに戻る',
-        footer: '© 2026 ニセコクラスター · 無断複写・転載を禁じます',
         sumHotel: 'ホテル', sumGuest: 'お客様', sumRoom: 'お部屋',
         sumDate: '日付', sumTime: '時間', sumItems: '個数', sumNote: '備考',
         submitFail: 'リクエストを送信できませんでした。再度お試しいただくか、フロントデスクまでご連絡ください。'
@@ -1007,7 +1013,6 @@
         successTitle: '요청이 확정되었습니다',
         successMsg: '수하물 픽업이 예약되었습니다. 저희 팀이 객실 앞에서 대기하겠습니다.',
         btnReset: '홈으로 돌아가기',
-        footer: '© 2026 니세코 클러스터 · 모든 권리 보유',
         sumHotel: '호텔', sumGuest: '고객', sumRoom: '객실',
         sumDate: '날짜', sumTime: '시간', sumItems: '개수', sumNote: '메모',
         submitFail: '요청을 전송하지 못했습니다. 다시 시도하시거나 프런트 데스크에 문의해 주세요.'
@@ -1047,7 +1052,6 @@
         successTitle: '请求已确认',
         successMsg: '您的行李收取已预约。我们的团队将在您的门前准备就绪。',
         btnReset: '返回首页',
-        footer: '© 2026 二世谷集群 · 版权所有',
         sumHotel: '酒店', sumGuest: '宾客', sumRoom: '房间',
         sumDate: '日期', sumTime: '时间', sumItems: '件数', sumNote: '备注',
         submitFail: '无法提交请求。请重试或联系前台。'
