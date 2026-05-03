@@ -234,8 +234,11 @@
     .hotel-card img {
       width: 100%;
       height: 110px;
-      object-fit: cover;
+      object-fit: contain;
+      object-position: center;
       display: block;
+      padding: 0.9rem;
+      background: var(--snow);
       filter: saturate(0.7);
       transition: filter 0.3s;
     }
@@ -627,7 +630,7 @@
       .hero { height: 300px; }
       .lang-switcher { top: 1rem; right: 1rem; }
       .hotel-grid { grid-template-columns: repeat(3, 1fr); gap: 0.65rem; }
-      .hotel-card img { height: 90px; }
+      .hotel-card img { height: 90px; padding: 0.7rem; }
       .fields-grid { grid-template-columns: 1fr 1fr; gap: 1rem; }
       .form-body { padding: 2rem; }
       .form-card-header { padding: 1.5rem 2rem; }
@@ -661,7 +664,7 @@
       .form-card-header svg { width: 22px; height: 22px; }
       .form-body { padding: 1.25rem; }
       .hotel-grid { grid-template-columns: 1fr 1fr; gap: 0.65rem; }
-      .hotel-card img { height: 80px; }
+      .hotel-card img { height: 80px; padding: 0.6rem; }
       .hotel-card-label { font-size: 0.74rem; padding: 0.5rem 0.6rem; }
       .fields-grid { grid-template-columns: 1fr; gap: 1rem; }
       .field.full { grid-column: 1; }
@@ -677,7 +680,7 @@
     /* Very small phones: max 380px */
     @media (max-width: 380px) {
       .hotel-grid { grid-template-columns: 1fr; }
-      .hotel-card img { height: 100px; }
+      .hotel-card img { height: 100px; padding: 0.8rem; }
       .lang-btn {
         font-size: 0.58rem;
         padding: 0.2rem 0.38rem;
@@ -755,7 +758,7 @@
             <label class="hotel-option">
               <input type="radio" name="hotel" value="Hilton" />
               <div class="hotel-card">
-                <img src="https://nisekocluster.com/wp-content/uploads/sites/91/2026/04/hnv-1.jpg" alt="Hilton Niseko Village" />
+                <img src="CTSNV.png" alt="Hilton Niseko Village" />
                 <div class="hotel-card-label">
                   <span class="check"></span>
                   Hilton
@@ -766,7 +769,7 @@
             <label class="hotel-option">
               <input type="radio" name="hotel" value="Hinode Hills" />
               <div class="hotel-card">
-                <img src="https://nisekocluster.com/wp-content/uploads/sites/91/2026/04/hh-1.jpg" alt="Hinode Hills" />
+                <img src="CTSHN.png" alt="Hinode Hills" />
                 <div class="hotel-card-label">
                   <span class="check"></span>
                   Hinode Hills
@@ -777,7 +780,7 @@
             <label class="hotel-option">
               <input type="radio" name="hotel" value="Green Leaf" />
               <div class="hotel-card">
-                <img src="https://nisekocluster.com/wp-content/uploads/sites/91/2026/04/gl-1.jpg" alt="Green Leaf" />
+                <img src="CTSGL.png" alt="Green Leaf" />
                 <div class="hotel-card-label">
                   <span class="check"></span>
                   Green Leaf
@@ -941,12 +944,12 @@
       },
       ja: {
         brand: 'ニセコクラスター',
-        heroTitle: '手荷物お預かり',
+        heroTitle: '荷物お預かり',
         heroAvailable: '毎日受付',
         heroHours: '午前6:00 – 午後12:00',
-        heroNotice: '手荷物のお預かりは午後11:00までにご予約ください',
-        cardTitle: '手荷物お預かり',
-        cardSubtitle: '手荷物の集荷をご予約ください',
+        heroNotice: '荷物のお預かりは午後11:00までにご予約ください',
+        cardTitle: '荷物お預かり',
+        cardSubtitle: '荷物の集荷をご予約ください',
         sectionHotel: 'ホテルを選択',
         sectionGuest: 'お客様情報',
         lblName: 'お名前',
@@ -967,12 +970,12 @@
         errDate: '日付を選択してください。',
         errTime: '集荷時間を選択してください。',
         errItems: '荷物の個数を選択してください。',
-        privacy: 'お客様の情報は安全に管理され、手荷物集荷の手配にのみ使用されます。',
+        privacy: 'お客様の情報は安全に管理され、荷物集荷の手配にのみ使用されます。',
         btnSubmit: 'リクエストを確定',
         btnSending: '送信中…',
         closedNotice: 'ご予約は日本時間の<strong>午前8:00から午後11:00</strong>まで受け付けております。営業時間内に再度お試しください。',
         successTitle: 'リクエストを承りました',
-        successMsg: '手荷物の集荷を承りました。スタッフがお部屋までお伺いいたします。',
+        successMsg: '荷物の集荷を承りました。スタッフがお部屋までお伺いいたします。',
         btnReset: 'ホームに戻る',
         sumHotel: 'ホテル', sumGuest: 'お客様', sumRoom: 'お部屋',
         sumDate: '日付', sumTime: '時間', sumItems: '個数', sumNote: '備考',
