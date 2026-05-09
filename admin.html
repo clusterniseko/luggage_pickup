@@ -1589,8 +1589,8 @@
         if (to)    { records = records.filter(r => r.date <= to);   label += `-to-${to}`; }
         if (!records.length) { showToast('No records match selected filters'); return; }
       }
-      const headers = ['Hotel','Guest Name','Room','Pick-up Date','Pick-up Time','Items','Special Request'];
-      const rows = records.map(r => [r.hotel, r.name, r.room, r.date, r.time, r.items, r.special || ''].map(v => `"${String(v).replace(/"/g,'""')}"`).join(','));
+      const headers = ['Hotel','Room','Guest Name','Pick-up Date','Pick-up Time','Items','Special Request'];
+      const rows = records.map(r => [r.hotel, r.room, r.name, r.date, r.time, r.items, r.special || ''].map(v => `"${String(v).replace(/"/g,'""')}"`).join(','));
       const csv  = [headers.join(','), ...rows].join('\n');
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
       const url  = URL.createObjectURL(blob);
