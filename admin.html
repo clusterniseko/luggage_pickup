@@ -334,6 +334,8 @@
 
     /* TABLE */
     .table-wrap { background: var(--white); border: 1px solid var(--mist); border-radius: 4px; overflow: auto; box-shadow: 0 1px 12px rgba(44,74,62,0.05); }
+    .scroll-mirror { overflow-x: auto; overflow-y: hidden; height: 14px; background: var(--snow); border: 1px solid var(--mist); border-bottom: none; border-radius: 4px 4px 0 0; }
+    .scroll-mirror + .table-wrap { border-top: none; border-radius: 0 0 4px 4px; }
     table { width: 100%; border-collapse: collapse; }
     thead th { background: var(--pine); color: rgba(255,255,255,0.7); font-size: 0.67rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; padding: 0.85rem 1rem; text-align: left; white-space: nowrap; }
     tbody tr { border-bottom: 1px solid var(--mist); transition: background 0.15s; }
@@ -829,11 +831,21 @@
           </div>
           <div class="export-field">
             <label>Pick-up Date From</label>
-            <input type="text" id="exportDateFrom" class="export-input" placeholder="From date" readonly style="cursor:pointer;"/>
+            <div class="date-filter-wrap">
+              <input type="text" id="exportDateFrom" class="export-input" placeholder="From date" readonly style="cursor:pointer;padding-right:1.8rem;"/>
+              <button class="btn-clear-date" id="btnClearExportFrom" onclick="clearExportDateFrom()" title="Clear" style="display:none">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </div>
           </div>
           <div class="export-field">
             <label>Pick-up Date To</label>
-            <input type="text" id="exportDateTo" class="export-input" placeholder="To date" readonly style="cursor:pointer;"/>
+            <div class="date-filter-wrap">
+              <input type="text" id="exportDateTo" class="export-input" placeholder="To date" readonly style="cursor:pointer;padding-right:1.8rem;"/>
+              <button class="btn-clear-date" id="btnClearExportTo" onclick="clearExportDateTo()" title="Clear" style="display:none">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </div>
           </div>
           <div class="export-actions">
             <button class="btn-export-all" onclick="exportCSV(false)">
@@ -1139,12 +1151,19 @@
       });
       exportDateFromPicker = flatpickr("#exportDateFrom", {
         dateFormat: "Y-m-d",
-        disableMobile: true
+        disableMobile: true,
+        onChange: function(dates) {
+          document.getElementById('btnClearExportFrom').style.display = dates.length ? 'flex' : 'none';
+        }
       });
       exportDateToPicker = flatpickr("#exportDateTo", {
         dateFormat: "Y-m-d",
-        disableMobile: true
+        disableMobile: true,
+        onChange: function(dates) {
+          document.getElementById('btnClearExportTo').style.display = dates.length ? 'flex' : 'none';
+        }
       });
+      initMirrorScrollbars();
     });
 
     // Auto-refresh from Railway every 30 seconds
@@ -1370,6 +1389,18 @@
       renderTable();
     }
 
+    function clearExportDateFrom() {
+      if (exportDateFromPicker) exportDateFromPicker.clear();
+      else document.getElementById('exportDateFrom').value = '';
+      document.getElementById('btnClearExportFrom').style.display = 'none';
+    }
+
+    function clearExportDateTo() {
+      if (exportDateToPicker) exportDateToPicker.clear();
+      else document.getElementById('exportDateTo').value = '';
+      document.getElementById('btnClearExportTo').style.display = 'none';
+    }
+
     // ── DETAIL CARD ──
     function openDetail(r) {
       document.getElementById('detailName').textContent = r.name || '—';
@@ -1580,6 +1611,29 @@
     }
 
     // Auto-refresh stats at midnight JST so Today/Tomorrow dates stay correct
+    function initMirrorScrollbars() {
+      document.querySelectorAll('.table-wrap').forEach(wrap => {
+        const mirror = document.createElement('div');
+        mirror.className = 'scroll-mirror';
+        const inner = document.createElement('div');
+        inner.style.height = '1px';
+        mirror.appendChild(inner);
+        wrap.parentNode.insertBefore(mirror, wrap);
+
+        function syncWidth() { inner.style.width = wrap.scrollWidth + 'px'; }
+        syncWidth();
+
+        let busy = false;
+        mirror.addEventListener('scroll', () => { if (busy) return; busy = true; wrap.scrollLeft = mirror.scrollLeft; busy = false; });
+        wrap.addEventListener('scroll', () => { if (busy) return; busy = true; mirror.scrollLeft = wrap.scrollLeft; busy = false; });
+
+        const ro = new ResizeObserver(syncWidth);
+        ro.observe(wrap);
+        const tbl = wrap.querySelector('table');
+        if (tbl) ro.observe(tbl);
+      });
+    }
+
     (function scheduleMidnightRefresh() {
       const nowJST = new Date(Date.now() + 9 * 60 * 60 * 1000);
       const nextMidnightJST = new Date(Date.UTC(
