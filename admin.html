@@ -629,12 +629,12 @@
       .stat-value { font-size: 1.75rem; }
 
       /* Export panel */
-      .export-filters { flex-direction: column; gap: 0.75rem; }
-      .export-field { flex-direction: row; align-items: center; gap: 0.5rem; }
-      .export-field label { flex: 0 0 45%; margin-bottom: 0; text-align: left; }
-      .export-field > .date-filter-wrap { flex: 1; min-width: 0; }
+      .export-filters { flex-direction: column; gap: 0.75rem; align-items: stretch; }
+      .export-field { flex-direction: column; align-items: stretch; gap: 0.35rem; width: 100%; }
+      .export-field label { flex: none; margin-bottom: 0; text-align: left; }
+      .export-field > .date-filter-wrap { width: 100%; min-width: 0; }
       .export-field > select.export-input,
-      .export-field > input.export-input { flex: 1; min-width: 0; width: 100%; }
+      .export-field > input.export-input { width: 100%; min-width: 0; }
       .export-actions { margin-left: 0; width: 100%; }
       .btn-do-export, .btn-export-all { flex: 1; justify-content: center; }
 
@@ -690,12 +690,12 @@
 
       /* Export panel */
       .export-panel { padding: 1.1rem 1rem; }
-      .export-filters { flex-direction: column; gap: 0.65rem; }
-      .export-field { flex-direction: row; align-items: center; gap: 0.5rem; }
-      .export-field label { flex: 0 0 45%; margin-bottom: 0; text-align: left; }
-      .export-field > .date-filter-wrap { flex: 1; min-width: 0; }
+      .export-filters { flex-direction: column; gap: 0.85rem; align-items: stretch; }
+      .export-field { flex-direction: column; align-items: stretch; gap: 0.35rem; width: 100%; }
+      .export-field label { flex: none; margin-bottom: 0; text-align: left; }
+      .export-field > .date-filter-wrap { width: 100%; min-width: 0; }
       .export-field > select.export-input,
-      .export-field > input.export-input { flex: 1; min-width: 0; width: 100%; }
+      .export-field > input.export-input { width: 100%; min-width: 0; }
       .export-actions { margin-left: 0; width: 100%; flex-direction: column; }
       .btn-do-export, .btn-export-all { width: 100%; justify-content: center; }
 
