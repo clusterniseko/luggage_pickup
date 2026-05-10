@@ -630,10 +630,11 @@
 
       /* Export panel */
       .export-filters { flex-direction: column; gap: 0.75rem; }
-      .export-field { display: grid; grid-template-columns: minmax(0,42%) minmax(0,58%); align-items: center; gap: 0.5rem; }
-      .export-field label { margin-bottom: 0; text-align: left; align-self: center; }
-      .export-field .date-filter-wrap,
-      .export-field .export-input { width: 100%; min-width: 0; box-sizing: border-box; }
+      .export-field { flex-direction: row; align-items: center; gap: 0.5rem; }
+      .export-field label { flex: 0 0 45%; margin-bottom: 0; text-align: left; }
+      .export-field > .date-filter-wrap { flex: 1; min-width: 0; }
+      .export-field > select.export-input,
+      .export-field > input.export-input { flex: 1; min-width: 0; width: 100%; }
       .export-actions { margin-left: 0; width: 100%; }
       .btn-do-export, .btn-export-all { flex: 1; justify-content: center; }
 
@@ -690,10 +691,11 @@
       /* Export panel */
       .export-panel { padding: 1.1rem 1rem; }
       .export-filters { flex-direction: column; gap: 0.65rem; }
-      .export-field { display: grid; grid-template-columns: minmax(0,42%) minmax(0,58%); align-items: center; gap: 0.5rem; }
-      .export-field label { margin-bottom: 0; text-align: left; align-self: center; }
-      .export-field .date-filter-wrap,
-      .export-field .export-input { width: 100%; min-width: 0; box-sizing: border-box; }
+      .export-field { flex-direction: row; align-items: center; gap: 0.5rem; }
+      .export-field label { flex: 0 0 45%; margin-bottom: 0; text-align: left; }
+      .export-field > .date-filter-wrap { flex: 1; min-width: 0; }
+      .export-field > select.export-input,
+      .export-field > input.export-input { flex: 1; min-width: 0; width: 100%; }
       .export-actions { margin-left: 0; width: 100%; flex-direction: column; }
       .btn-do-export, .btn-export-all { width: 100%; justify-content: center; }
 
