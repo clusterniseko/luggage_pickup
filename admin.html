@@ -412,6 +412,23 @@
     .btn-confirm-delete { padding: 0.6rem 1.3rem; background: var(--danger); border: none; border-radius: 3px; font-family: 'Jost', sans-serif; font-size: 0.8rem; font-weight: 500; color: var(--white); cursor: pointer; letter-spacing: 0.08em; text-transform: uppercase; transition: background 0.2s; }
     .btn-confirm-delete:hover { background: #a93226; }
 
+    /* SESSION TIMEOUT OVERLAY */
+    .session-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.65); backdrop-filter: blur(4px); z-index: 500; display: none; align-items: center; justify-content: center; padding: 1rem; }
+    .session-overlay.show { display: flex; }
+    .session-card { background: var(--white); border-radius: 4px; padding: 2.5rem 2rem 2rem; max-width: 400px; width: 100%; box-shadow: 0 24px 80px rgba(0,0,0,0.35); animation: fadeUp 0.25s ease both; text-align: center; }
+    .session-icon { width: 52px; height: 52px; margin: 0 auto 1.2rem; background: rgba(196,169,107,0.12); border: 1px solid rgba(196,169,107,0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+    .session-icon svg { width: 22px; height: 22px; color: var(--gold); }
+    .session-card h3 { font-family: 'Cormorant Garamond', serif; font-size: 1.4rem; font-weight: 400; color: var(--ink); margin-bottom: 0.5rem; }
+    .session-card p { font-size: 0.83rem; color: #777; font-weight: 300; line-height: 1.6; margin-bottom: 1.5rem; }
+    .session-timer { font-family: 'Cormorant Garamond', serif; font-size: 3.2rem; font-weight: 500; color: var(--pine); line-height: 1; margin-bottom: 0.4rem; }
+    .session-timer.urgent { color: var(--danger); }
+    .session-timer-label { font-size: 0.68rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: #bbb; margin-bottom: 1.8rem; }
+    .session-btns { display: flex; gap: 0.75rem; justify-content: center; }
+    .btn-session-logout { padding: 0.65rem 1.4rem; background: transparent; border: 1.5px solid var(--mist); border-radius: 3px; font-family: 'Jost', sans-serif; font-size: 0.78rem; font-weight: 500; color: #888; cursor: pointer; letter-spacing: 0.1em; text-transform: uppercase; transition: border-color 0.2s, color 0.2s; }
+    .btn-session-logout:hover { border-color: var(--danger); color: var(--danger); }
+    .btn-session-extend { padding: 0.65rem 1.6rem; background: var(--pine); border: none; border-radius: 3px; font-family: 'Jost', sans-serif; font-size: 0.78rem; font-weight: 500; color: var(--white); cursor: pointer; letter-spacing: 0.1em; text-transform: uppercase; transition: background 0.2s; }
+    .btn-session-extend:hover { background: var(--pine-light); }
+
     /* TOAST */
     .toast { position: fixed; bottom: 2rem; right: 2rem; background: var(--pine); color: var(--white); padding: 0.75rem 1.25rem; border-radius: 3px; font-size: 0.82rem; font-weight: 400; box-shadow: 0 4px 20px rgba(0,0,0,0.2); transform: translateY(20px); opacity: 0; transition: all 0.3s ease; z-index: 300; pointer-events: none; }
     .toast.show { transform: translateY(0); opacity: 1; }
@@ -612,8 +629,11 @@
       .stat-value { font-size: 1.75rem; }
 
       /* Export panel */
-      .export-filters { flex-direction: column; gap: 0.85rem; }
-      .export-input { min-width: 100%; }
+      .export-filters { flex-direction: column; gap: 0.75rem; }
+      .export-field { flex-direction: row; align-items: center; justify-content: space-between; gap: 0.75rem; }
+      .export-field label { flex-shrink: 0; margin-bottom: 0; }
+      .export-field .date-filter-wrap,
+      .export-input { min-width: 0; width: 60%; }
       .export-actions { margin-left: 0; width: 100%; }
       .btn-do-export, .btn-export-all { flex: 1; justify-content: center; }
 
@@ -633,6 +653,10 @@
 
       /* Modal */
       .modal { padding: 1.5rem; }
+
+      /* Session overlay: centered card, slightly smaller */
+      .session-card { padding: 2rem 1.75rem 1.75rem; }
+      .session-timer { font-size: 2.8rem; }
     }
 
     /* ── MOBILE (≤ 600px) ── */
@@ -665,8 +689,11 @@
 
       /* Export panel */
       .export-panel { padding: 1.1rem 1rem; }
-      .export-filters { flex-direction: column; gap: 0.75rem; }
-      .export-input { min-width: 100%; }
+      .export-filters { flex-direction: column; gap: 0.65rem; }
+      .export-field { flex-direction: row; align-items: center; justify-content: space-between; gap: 0.75rem; }
+      .export-field label { flex-shrink: 0; margin-bottom: 0; }
+      .export-field .date-filter-wrap,
+      .export-input { min-width: 0; width: 58%; }
       .export-actions { margin-left: 0; width: 100%; flex-direction: column; }
       .btn-do-export, .btn-export-all { width: 100%; justify-content: center; }
 
@@ -703,6 +730,15 @@
       .modal-btns { flex-direction: column-reverse; gap: 0.5rem; }
       .btn-cancel, .btn-confirm-delete { width: 100%; text-align: center; justify-content: center; padding: 0.8rem; }
 
+      /* Session overlay: bottom sheet on mobile */
+      .session-overlay { align-items: flex-end; padding: 0; }
+      .session-card { border-radius: 16px 16px 0 0; padding: 1.75rem 1.25rem 2.5rem; max-width: 100%; width: 100%; }
+      .session-icon { width: 44px; height: 44px; margin-bottom: 1rem; }
+      .session-card h3 { font-size: 1.25rem; }
+      .session-timer { font-size: 3rem; }
+      .session-btns { flex-direction: column-reverse; gap: 0.6rem; }
+      .btn-session-logout, .btn-session-extend { width: 100%; justify-content: center; padding: 0.85rem; font-size: 0.82rem; }
+
       /* Toast: full width bottom */
       .toast { left: 0.75rem; right: 0.75rem; bottom: 1rem; text-align: center; }
     }
@@ -713,6 +749,14 @@
       .stat-value { font-size: 1.3rem; }
       .topbar-right { gap: 0.4rem; }
       .btn-small { padding: 0.38rem 0.6rem; }
+
+      /* Session overlay: compact for very small screens */
+      .session-card { padding: 1.5rem 1rem 2.25rem; }
+      .session-icon { display: none; }
+      .session-timer { font-size: 2.6rem; }
+      .session-card h3 { font-size: 1.15rem; }
+      .session-card p { font-size: 0.78rem; margin-bottom: 1rem; }
+      .session-timer-label { margin-bottom: 1.4rem; }
     }
   </style>
 </head>
@@ -988,6 +1032,25 @@
     </div>
   </div>
 
+  <!-- ═══ SESSION TIMEOUT OVERLAY ═══ -->
+  <div class="session-overlay" id="sessionOverlay">
+    <div class="session-card">
+      <div class="session-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+        </svg>
+      </div>
+      <h3>Session Expiring Soon</h3>
+      <p>No activity detected. You will be logged out automatically.</p>
+      <div class="session-timer" id="sessionTimerDisplay">1:00</div>
+      <div class="session-timer-label">remaining</div>
+      <div class="session-btns">
+        <button class="btn-session-logout" onclick="doLogout()">Log Out</button>
+        <button class="btn-session-extend" onclick="extendSession()">Extend Session</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ═══ DETAIL CARD OVERLAY ═══ -->
   <div class="detail-overlay" id="detailOverlay">
     <div class="detail-card">
@@ -1102,6 +1165,7 @@
           document.getElementById('adminApp').classList.add('show');
           document.getElementById('topbarUser').textContent = user;
           loadAll();
+          resetInactivityTimer();
         } else {
           err.classList.add('show');
           document.getElementById('loginPass').value = '';
@@ -1117,14 +1181,70 @@
     }
 
     function doLogout() {
+      clearInactivityTimers();
       sessionStorage.removeItem(AUTH_KEY);
       sessionStorage.removeItem('luggage_admin_user');
       document.getElementById('adminApp').classList.remove('show');
       document.getElementById('loginScreen').style.display = 'flex';
       document.getElementById('loginUser').value = '';
       document.getElementById('loginPass').value = '';
+      document.getElementById('sessionOverlay').classList.remove('show');
       clearSelection();
     }
+
+    // ── AUTO LOGOUT ──
+    const INACTIVITY_LIMIT = 60 * 60 * 1000; // 1 hour
+    const COUNTDOWN_SECS   = 60;              // 1-minute warning
+
+    let inactivityTimer  = null;
+    let countdownTimer   = null;
+    let countdownSeconds = COUNTDOWN_SECS;
+
+    function clearInactivityTimers() {
+      clearTimeout(inactivityTimer);
+      clearInterval(countdownTimer);
+      inactivityTimer = null;
+      countdownTimer  = null;
+    }
+
+    function resetInactivityTimer() {
+      if (!sessionStorage.getItem(AUTH_KEY)) return;
+      clearInactivityTimers();
+      document.getElementById('sessionOverlay').classList.remove('show');
+      inactivityTimer = setTimeout(showSessionWarning, INACTIVITY_LIMIT);
+    }
+
+    function showSessionWarning() {
+      countdownSeconds = COUNTDOWN_SECS;
+      updateTimerDisplay();
+      document.getElementById('sessionOverlay').classList.add('show');
+      countdownTimer = setInterval(() => {
+        countdownSeconds--;
+        updateTimerDisplay();
+        if (countdownSeconds <= 0) {
+          clearInterval(countdownTimer);
+          doLogout();
+        }
+      }, 1000);
+    }
+
+    function updateTimerDisplay() {
+      const mins = Math.floor(countdownSeconds / 60);
+      const secs = countdownSeconds % 60;
+      const el = document.getElementById('sessionTimerDisplay');
+      el.textContent = `${mins}:${String(secs).padStart(2, '0')}`;
+      el.classList.toggle('urgent', countdownSeconds <= 15);
+    }
+
+    function extendSession() {
+      resetInactivityTimer();
+    }
+
+    ['mousemove','mousedown','keydown','scroll','touchstart','click'].forEach(evt => {
+      document.addEventListener(evt, () => {
+        if (sessionStorage.getItem(AUTH_KEY)) resetInactivityTimer();
+      }, { passive: true });
+    });
 
     // Allow Enter key on login form
     ['loginUser','loginPass'].forEach(id => {
@@ -1140,6 +1260,7 @@
         document.getElementById('adminApp').classList.add('show');
         document.getElementById('topbarUser').textContent = savedUser;
         loadAll();
+        resetInactivityTimer();
       }
       // Initialize flatpickr on date filters
       filterDatePicker = flatpickr("#filterDate", {
