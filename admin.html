@@ -1164,6 +1164,7 @@
           const data = await res.json();
           sessionStorage.setItem(AUTH_KEY, data.token || user);
           sessionStorage.setItem('luggage_admin_user', user);
+          sessionStorage.setItem('luggage_admin_login_time', Date.now());
           err.classList.remove('show');
           document.getElementById('loginScreen').style.display = 'none';
           document.getElementById('adminApp').classList.add('show');
@@ -1188,6 +1189,7 @@
       clearInactivityTimers();
       sessionStorage.removeItem(AUTH_KEY);
       sessionStorage.removeItem('luggage_admin_user');
+      sessionStorage.removeItem('luggage_admin_login_time');
       document.getElementById('adminApp').classList.remove('show');
       document.getElementById('loginScreen').style.display = 'flex';
       document.getElementById('loginUser').value = '';
@@ -1255,16 +1257,31 @@
       document.getElementById(id).addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
     });
 
+    const SESSION_MAX_AGE = 8 * 60 * 60 * 1000; // 8 hours
+
+    // Clear session when tab/window is closed
+    window.addEventListener('beforeunload', () => {
+      sessionStorage.removeItem(AUTH_KEY);
+      sessionStorage.removeItem('luggage_admin_user');
+      sessionStorage.removeItem('luggage_admin_login_time');
+    });
+
     // Check session on load
     window.addEventListener('load', () => {
-      const token = sessionStorage.getItem(AUTH_KEY);
+      const token     = sessionStorage.getItem(AUTH_KEY);
       const savedUser = sessionStorage.getItem('luggage_admin_user');
-      if (token && savedUser) {
+      const loginTime = parseInt(sessionStorage.getItem('luggage_admin_login_time') || '0', 10);
+      const sessionValid = token && savedUser && loginTime && (Date.now() - loginTime < SESSION_MAX_AGE);
+      if (sessionValid) {
         document.getElementById('loginScreen').style.display = 'none';
         document.getElementById('adminApp').classList.add('show');
         document.getElementById('topbarUser').textContent = savedUser;
         loadAll();
         resetInactivityTimer();
+      } else {
+        sessionStorage.removeItem(AUTH_KEY);
+        sessionStorage.removeItem('luggage_admin_user');
+        sessionStorage.removeItem('luggage_admin_login_time');
       }
       // Initialize flatpickr on date filters
       filterDatePicker = flatpickr("#filterDate", {
