@@ -1187,9 +1187,7 @@
 
     function doLogout() {
       clearInactivityTimers();
-      sessionStorage.removeItem(AUTH_KEY);
-      sessionStorage.removeItem('luggage_admin_user');
-      sessionStorage.removeItem('luggage_admin_login_time');
+      clearSession();
       document.getElementById('adminApp').classList.remove('show');
       document.getElementById('loginScreen').style.display = 'flex';
       document.getElementById('loginUser').value = '';
@@ -1259,29 +1257,32 @@
 
     const SESSION_MAX_AGE = 8 * 60 * 60 * 1000; // 8 hours
 
-    // Clear session when tab/window is closed
-    window.addEventListener('beforeunload', () => {
+    function clearSession() {
       sessionStorage.removeItem(AUTH_KEY);
       sessionStorage.removeItem('luggage_admin_user');
       sessionStorage.removeItem('luggage_admin_login_time');
-    });
+    }
 
     // Check session on load
     window.addEventListener('load', () => {
+      const navEntry = performance.getEntriesByType('navigation')[0];
+      const isReload = navEntry ? navEntry.type === 'reload' : performance.navigation.type === 1;
+
       const token     = sessionStorage.getItem(AUTH_KEY);
       const savedUser = sessionStorage.getItem('luggage_admin_user');
       const loginTime = parseInt(sessionStorage.getItem('luggage_admin_login_time') || '0', 10);
-      const sessionValid = token && savedUser && loginTime && (Date.now() - loginTime < SESSION_MAX_AGE);
-      if (sessionValid) {
+      const notExpired = loginTime && (Date.now() - loginTime < SESSION_MAX_AGE);
+
+      // Keep session only on refresh within the allowed time window
+      if (token && savedUser && notExpired && isReload) {
         document.getElementById('loginScreen').style.display = 'none';
         document.getElementById('adminApp').classList.add('show');
         document.getElementById('topbarUser').textContent = savedUser;
         loadAll();
         resetInactivityTimer();
-      } else {
-        sessionStorage.removeItem(AUTH_KEY);
-        sessionStorage.removeItem('luggage_admin_user');
-        sessionStorage.removeItem('luggage_admin_login_time');
+      } else if (!isReload) {
+        // Fresh open or browser session restore → always require login
+        clearSession();
       }
       // Initialize flatpickr on date filters
       filterDatePicker = flatpickr("#filterDate", {
