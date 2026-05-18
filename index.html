@@ -138,7 +138,6 @@
       font-weight: 300;
       letter-spacing: 0.05em;
       color: rgba(255,255,255,0.6);
-      margin-top: -0.25rem;
     }
 
     /* ── MAIN CONTAINER ── */
@@ -722,11 +721,6 @@
         <span data-i18n="brand">Niseko Cluster</span>
       </div>
       <h1 data-i18n="heroTitle">Luggage Pick-up</h1>
-      <div class="hero-subtitle">
-        <span data-i18n="heroAvailable">Available Daily</span>
-        <span class="dot"></span>
-        <span data-i18n="heroHours">6:00 AM – 12:00 PM</span>
-      </div>
       <div class="hero-notice" data-i18n="heroNotice">
         Please, schedule your luggage pick-up before 11:00 PM
       </div>
@@ -840,7 +834,7 @@
                   <option>9:00 AM</option><option>9:15 AM</option><option>9:30 AM</option><option>9:45 AM</option>
                   <option>10:00 AM</option><option>10:15 AM</option><option>10:30 AM</option><option>10:45 AM</option>
                   <option>11:00 AM</option><option>11:15 AM</option><option>11:30 AM</option><option>11:45 AM</option>
-                  <option>12:00 PM</option>
+                  <option>12:00 PM</option><option value="Other" data-i18n="timeOtherNote">Other (Add desired pick-up time as a special request)</option>
                 </select>
               </div>
               <span class="field-error" data-i18n="errTime">Please select a pick-up time.</span>
@@ -928,6 +922,7 @@
         phRoom: 'e.g. 412',
         phDate: 'Select date',
         phTime: 'Select time',
+        timeOther: 'Other',
         phItems: 'Select quantity',
         phSpecial: 'Any notes for our team…',
         errHotel: 'Please select a hotel.',
@@ -945,7 +940,9 @@
         btnReset: 'Back to Home',
         sumHotel: 'Hotel', sumGuest: 'Guest', sumRoom: 'Room',
         sumDate: 'Date', sumTime: 'Time', sumItems: 'Items', sumNote: 'Note',
-        submitFail: 'Could not submit request. Please try again or contact the front desk.'
+        submitFail: 'Could not submit request. Please try again or contact the front desk.',
+        timeOther: 'Other',
+        timeOtherNote: 'Other (Add desired pick-up time as a special request)'
       },
       ja: {
         brand: 'ニセコクラスター',
@@ -968,6 +965,7 @@
         phRoom: '例: 412',
         phDate: '日付を選択',
         phTime: '時間を選択',
+        timeOther: 'その他',
         phItems: '個数を選択',
         phSpecial: 'スタッフへのご要望があればご記入ください…',
         errHotel: 'ホテルを選択してください。',
@@ -979,13 +977,15 @@
         privacy: 'お客様の情報は安全に管理され、荷物集荷の手配にのみ使用されます。',
         btnSubmit: 'リクエストを確定',
         btnSending: '送信中…',
-        closedNotice: 'ご予約は日本時間の<strong>午前8:00から午後11:00</strong>まで受け付けております。営業時間内に再度お試しください。',
+        closedNotice: 'ご予約は日本時間の<strong>8:00から23:00</strong>まで受け付けております。営業時間内に再度お試しください。',
         successTitle: 'リクエストを承りました',
         successMsg: '荷物の集荷を承りました。スタッフがお部屋までお伺いいたします。',
         btnReset: 'ホームに戻る',
         sumHotel: 'ホテル', sumGuest: 'お客様', sumRoom: 'お部屋',
         sumDate: '日付', sumTime: '時間', sumItems: '個数', sumNote: '備考',
-        submitFail: 'リクエストを送信できませんでした。再度お試しいただくか、フロントデスクまでご連絡ください。'
+        submitFail: 'リクエストを送信できませんでした。再度お試しいただくか、フロントデスクまでご連絡ください。',
+        timeOther: 'その他',
+        timeOtherNote: 'その他（ご希望の集荷時間をご要望欄にご記入ください）'
       },
       ko: {
         brand: '니세코 클러스터',
@@ -1008,6 +1008,7 @@
         phRoom: '예: 412',
         phDate: '날짜 선택',
         phTime: '시간 선택',
+        timeOther: '기타',
         phItems: '개수 선택',
         phSpecial: '저희 팀에 전달할 메모가 있으면 입력해 주세요…',
         errHotel: '호텔을 선택해 주세요.',
@@ -1025,7 +1026,9 @@
         btnReset: '홈으로 돌아가기',
         sumHotel: '호텔', sumGuest: '고객', sumRoom: '객실',
         sumDate: '날짜', sumTime: '시간', sumItems: '개수', sumNote: '메모',
-        submitFail: '요청을 전송하지 못했습니다. 다시 시도하시거나 프런트 데스크에 문의해 주세요.'
+        submitFail: '요청을 전송하지 못했습니다. 다시 시도하시거나 프런트 데스크에 문의해 주세요.',
+        timeOther: '기타',
+        timeOtherNote: '기타 (원하시는 픽업 시간을 요청 사항에 추가해 주세요)'
       },
       zh: {
         brand: '二世谷集群',
@@ -1042,6 +1045,7 @@
         lblRoom: '房间号',
         lblDate: '收取日期',
         lblTime: '收取时间',
+        timeOther: '其他',
         lblItems: '行李件数',
         lblSpecial: '特殊要求',
         phName: '全名',
@@ -1065,7 +1069,9 @@
         btnReset: '返回首页',
         sumHotel: '酒店', sumGuest: '宾客', sumRoom: '房间',
         sumDate: '日期', sumTime: '时间', sumItems: '件数', sumNote: '备注',
-        submitFail: '无法提交请求。请重试或联系前台。'
+        submitFail: '无法提交请求。请重试或联系前台。',
+        timeOther: '其他',
+        timeOtherNote: '其他（请在特殊要求中填写您希望的取件时间）'
       }
     };
 
@@ -1096,6 +1102,13 @@
       document.querySelectorAll('.lang-btn').forEach(btn => {
         btn.classList.toggle('active', btn.getAttribute('data-lang') === lang);
       });
+
+      // If "Other" is already selected, keep short text in the closed box
+      const timeSelect = document.getElementById('pickupTime');
+      const otherOpt = timeSelect ? timeSelect.querySelector('option[value="Other"]') : null;
+      if (otherOpt && timeSelect.value === 'Other') {
+        otherOpt.textContent = dict.timeOther || 'Other';
+      }
 
       // Update flatpickr locale-ish placeholder & redraw
       const dateInput = document.getElementById('pickupDate');
@@ -1282,6 +1295,23 @@
     document.getElementById('roomNumber').addEventListener('input', () => setError('fieldRoom', false));
     // date onChange handled by flatpickr init above
     document.getElementById('pickupTime').addEventListener('change', () => setError('fieldTime', false));
+
+    // "Other" option: show full note in dropdown, short text when selected
+    (function () {
+      const sel = document.getElementById('pickupTime');
+      const opt = sel.querySelector('option[value="Other"]');
+      function restoreShort() {
+        if (opt && sel.value === 'Other') opt.textContent = t('timeOther');
+      }
+      sel.addEventListener('mousedown', () => {
+        if (opt) opt.textContent = t('timeOtherNote');
+      });
+      sel.addEventListener('keydown', () => {
+        if (opt) opt.textContent = t('timeOtherNote');
+      });
+      sel.addEventListener('change', restoreShort);
+      sel.addEventListener('blur', restoreShort);
+    })();
     document.getElementById('numberOfItems').addEventListener('change', () => setError('fieldItems', false));
     document.querySelectorAll('input[name="hotel"]').forEach(r =>
       r.addEventListener('change', () => hotelError.classList.remove('show'))
