@@ -1412,8 +1412,10 @@
         return mH && mD;
       });
 
-      const todayCount    = allRecords.filter(r => r.date === today).length;
-      const tomorrowCount = allRecords.filter(r => r.date === tomorrow).length;
+      // Today / Tomorrow honor the hotel filter (but not the date filter,
+      // which would otherwise zero them out for any other selected date)
+      const todayCount    = allRecords.filter(r => (!filterHotel || r.hotel === filterHotel) && r.date === today).length;
+      const tomorrowCount = allRecords.filter(r => (!filterHotel || r.hotel === filterHotel) && r.date === tomorrow).length;
       const totalItems = filtered.reduce((s, r) => { const n = parseInt(r.items); return s + (isNaN(n) ? 0 : n); }, 0);
 
       // Most active hotel (always from full dataset)
