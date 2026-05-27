@@ -426,9 +426,7 @@ def send_daily_report():
     msg.attach(attachment)
 
     try:
-        with smtplib.SMTP("smtp.gmail.com", 587) as server:
-            server.ehlo()
-            server.starttls()
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
             server.login(gmail_from, gmail_password)
             server.sendmail(gmail_from, report_to_list, msg.as_string())
         log.info(f"Daily report sent: {len(records)} Hilton requests for {tomorrow_str} → {report_to}")
