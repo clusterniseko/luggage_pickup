@@ -6,7 +6,7 @@ import hashlib
 import time
 import base64
 from functools import wraps
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
@@ -306,6 +306,137 @@ def auth_login():
     token = make_session_token(matched_user)
     log.info(f"Admin login success: {matched_user}")
     return jsonify({"token": token, "username": matched_user}), 200
+
+# ── DAILY REPORT — Hilton ─────────────────────────────
+@app.route("/api/send-daily-report", methods=["POST"])
+def send_daily_report():
+    import smtplib
+    import io
+    from email.mime.multipart import MIMEMultipart
+    from email.mime.base import MIMEBase
+    from email.mime.text import MIMEText
+    from email import encoders
+    import openpyxl
+    from openpyxl.styles import Font, PatternFill, Alignment
+
+    # ── Validate secret token ──
+    auth_header = request.headers.get("Authorization", "")
+    token = auth_header.replace("Bearer ", "").strip()
+    report_secret = os.environ.get("REPORT_SECRET", "")
+    if not report_secret or token != report_secret:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    # ── Tomorrow's date in JST (UTC+9) ──
+    JST = timezone(timedelta(hours=9))
+    now_jst = datetime.now(JST)
+    tomorrow_jst = now_jst + timedelta(days=1)
+    tomorrow_str = tomorrow_jst.strftime("%Y-%m-%d")
+
+    # ── Query: Hilton requests for tomorrow ──
+    HOTEL = "Hilton"
+    records = (
+        LuggageRequest.query
+        .filter_by(trashed=False, hotel=HOTEL, date=tomorrow_str)
+        .order_by(LuggageRequest.time)
+        .all()
+    )
+
+    if not records:
+        log.info(f"Daily report: no {HOTEL} requests for {tomorrow_str} — email not sent")
+        return jsonify({"sent": False, "date": tomorrow_str, "count": 0})
+
+    # ── Build Excel ──
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = f"Hilton {tomorrow_str}"
+
+    header_fill = PatternFill("solid", fgColor="1A3A6B")   # Hilton navy
+    header_font = Font(color="FFFFFF", bold=True, size=11)
+    center      = Alignment(horizontal="center", vertical="center")
+
+    headers = ["Hotel", "Room", "Guest Name", "Pick-up Date", "Pick-up Time", "Items", "Special Notes"]
+    for col, h in enumerate(headers, 1):
+        cell = ws.cell(row=1, column=col, value=h)
+        cell.fill      = header_fill
+        cell.font      = header_font
+        cell.alignment = center
+
+    for row_idx, r in enumerate(records, 2):
+        ws.cell(row=row_idx, column=1, value=r.hotel)
+        ws.cell(row=row_idx, column=2, value=r.room)
+        ws.cell(row=row_idx, column=3, value=r.name)
+        ws.cell(row=row_idx, column=4, value=r.date)
+        ws.cell(row=row_idx, column=5, value=r.time)
+        ws.cell(row=row_idx, column=6, value=r.items)
+        ws.cell(row=row_idx, column=7, value=r.special or "")
+
+    # Auto-fit column widths
+    for col in ws.columns:
+        max_len = max(len(str(cell.value or "")) for cell in col)
+        ws.column_dimensions[col[0].column_letter].width = max_len + 4
+
+    excel_buffer = io.BytesIO()
+    wb.save(excel_buffer)
+    excel_buffer.seek(0)
+
+    # ── Send email via Gmail SMTP ──
+    gmail_from     = os.environ.get("GMAIL_FROM", "")
+    gmail_password = os.environ.get("GMAIL_APP_PASSWORD", "")
+    report_to_raw  = os.environ.get("REPORT_EMAIL_TO_HILTON", "")
+    report_to_list = [e.strip() for e in report_to_raw.split(",") if e.strip()]
+
+    if not all([gmail_from, gmail_password, report_to_list]):
+        log.error("Daily report: one or more email env vars are missing")
+        return jsonify({"error": "Email configuration incomplete"}), 500
+
+    subject = f"Luggage Pick-up — Hilton — {tomorrow_str} ({len(records)} request{'s' if len(records) != 1 else ''})"
+    body = (
+        f"お疲れ様です。\n\n"
+        f"ラゲッジピックアップのご依頼 — ヒルトンニセコビレッジ\n"
+        f"日付：{tomorrow_str}\n"
+        f"リクエスト数：{len(records)}\n\n"
+        f"詳細は添付のExcelファイルをご確認ください。\n\n"
+        f"よろしくお願いいたします。\n\n"
+        f"ヒルトン ニセコビレッジ - ラゲッジピックアップシステム\n"
+        f"コンシエル・ベルデスク\n"
+        f"オルテガ・イエンリー\n"
+        f"{'─' * 40}\n"
+        f"Good evening,\n\n"
+        f"Luggage Pick-up Requests — Hilton Niseko Village\n"
+        f"Date: {tomorrow_str}\n"
+        f"Total requests: {len(records)}\n\n"
+        f"Please find the attached Excel file with the full details.\n\n"
+        f"Best regards,\n\n"
+        f"Hilton Niseko Village - Luggage Pick-Up System\n"
+        f"Concierge-Bell Desk\n"
+        f"Yenry Ortega"
+    )
+
+    msg = MIMEMultipart()
+    msg["From"]    = gmail_from
+    msg["To"]      = ", ".join(report_to_list)
+    msg["Subject"] = subject
+    msg.attach(MIMEText(body, "plain"))
+
+    filename   = f"hilton-luggage-pick-up-{tomorrow_str}.xlsx"
+    attachment = MIMEBase("application", "octet-stream")
+    attachment.set_payload(excel_buffer.read())
+    encoders.encode_base64(attachment)
+    attachment.add_header("Content-Disposition", f'attachment; filename="{filename}"')
+    msg.attach(attachment)
+
+    try:
+        with smtplib.SMTP("smtp.gmail.com", 587) as server:
+            server.ehlo()
+            server.starttls()
+            server.login(gmail_from, gmail_password)
+            server.sendmail(gmail_from, report_to_list, msg.as_string())
+        log.info(f"Daily report sent: {len(records)} Hilton requests for {tomorrow_str} → {report_to}")
+        return jsonify({"sent": True, "date": tomorrow_str, "count": len(records)})
+    except Exception as e:
+        log.error(f"Daily report email failed: {e}")
+        return jsonify({"error": str(e)}), 500
+
 
 # ── ENTRY POINT ───────────────────────────────────────
 # init_db() runs at module load — before gunicorn serves any traffic
