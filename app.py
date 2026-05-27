@@ -310,12 +310,7 @@ def auth_login():
 # ── DAILY REPORT — Hilton ─────────────────────────────
 @app.route("/api/send-daily-report", methods=["POST"])
 def send_daily_report():
-    import smtplib
     import io
-    from email.mime.multipart import MIMEMultipart
-    from email.mime.base import MIMEBase
-    from email.mime.text import MIMEText
-    from email import encoders
     import openpyxl
     from openpyxl.styles import Font, PatternFill, Alignment
 
@@ -379,13 +374,16 @@ def send_daily_report():
     wb.save(excel_buffer)
     excel_buffer.seek(0)
 
-    # ── Send email via Gmail SMTP ──
+    # ── Send email via SendGrid HTTP API ──
+    import json
+    import urllib.request
+
+    sendgrid_key   = os.environ.get("SENDGRID_API_KEY", "")
     gmail_from     = os.environ.get("GMAIL_FROM", "")
-    gmail_password = os.environ.get("GMAIL_APP_PASSWORD", "")
     report_to_raw  = os.environ.get("REPORT_EMAIL_TO_HILTON", "")
     report_to_list = [e.strip() for e in report_to_raw.split(",") if e.strip()]
 
-    if not all([gmail_from, gmail_password, report_to_list]):
+    if not all([sendgrid_key, gmail_from, report_to_list]):
         log.error("Daily report: one or more email env vars are missing")
         return jsonify({"error": "Email configuration incomplete"}), 500
 
@@ -412,24 +410,35 @@ def send_daily_report():
         f"Yenry Ortega"
     )
 
-    msg = MIMEMultipart()
-    msg["From"]    = gmail_from
-    msg["To"]      = ", ".join(report_to_list)
-    msg["Subject"] = subject
-    msg.attach(MIMEText(body, "plain"))
+    filename       = f"hilton-luggage-pick-up-{tomorrow_str}.xlsx"
+    encoded_excel  = base64.b64encode(excel_buffer.read()).decode()
 
-    filename   = f"hilton-luggage-pick-up-{tomorrow_str}.xlsx"
-    attachment = MIMEBase("application", "octet-stream")
-    attachment.set_payload(excel_buffer.read())
-    encoders.encode_base64(attachment)
-    attachment.add_header("Content-Disposition", f'attachment; filename="{filename}"')
-    msg.attach(attachment)
+    payload = {
+        "personalizations": [{"to": [{"email": e} for e in report_to_list]}],
+        "from": {"email": gmail_from, "name": "Hilton Niseko Village - Luggage Pick-Up"},
+        "subject": subject,
+        "content": [{"type": "text/plain", "value": body}],
+        "attachments": [{
+            "content": encoded_excel,
+            "filename": filename,
+            "type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "disposition": "attachment"
+        }]
+    }
 
     try:
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
-            server.login(gmail_from, gmail_password)
-            server.sendmail(gmail_from, report_to_list, msg.as_string())
-        log.info(f"Daily report sent: {len(records)} Hilton requests for {tomorrow_str} → {report_to}")
+        req = urllib.request.Request(
+            "https://api.sendgrid.com/v3/mail/send",
+            data=json.dumps(payload).encode("utf-8"),
+            headers={
+                "Authorization": f"Bearer {sendgrid_key}",
+                "Content-Type": "application/json"
+            },
+            method="POST"
+        )
+        with urllib.request.urlopen(req) as resp:
+            status = resp.status
+        log.info(f"Daily report sent: {len(records)} Hilton requests for {tomorrow_str} → {report_to_list} (HTTP {status})")
         return jsonify({"sent": True, "date": tomorrow_str, "count": len(records)})
     except Exception as e:
         log.error(f"Daily report email failed: {e}")
