@@ -1384,8 +1384,8 @@
     function formatSubmitted(iso) {
       if (!iso) return '—';
       const d = new Date(iso);
-      return d.toLocaleDateString('en-GB', { day:'2-digit', month:'short' })
-           + ' ' + d.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' });
+      return d.toLocaleDateString('en-GB', { day:'2-digit', month:'short', timeZone: 'Asia/Tokyo' })
+           + ' ' + d.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit', timeZone: 'Asia/Tokyo' });
     }
     function escHtml(str) {
       return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
