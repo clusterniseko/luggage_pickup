@@ -1383,7 +1383,7 @@
     }
     function formatSubmitted(iso) {
       if (!iso) return '—';
-      const d = new Date(iso);
+      const d = new Date(iso.endsWith('Z') ? iso : iso + 'Z');
       return d.toLocaleDateString('en-GB', { day:'2-digit', month:'short', timeZone: 'Asia/Tokyo' })
            + ' ' + d.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit', timeZone: 'Asia/Tokyo' });
     }
