@@ -374,16 +374,18 @@ def send_daily_report():
     wb.save(excel_buffer)
     excel_buffer.seek(0)
 
-    # ── Send email via SendGrid HTTP API ──
+    # ── Send email via Resend HTTP API ──
     import json
     import urllib.request
+    import urllib.error
 
-    sendgrid_key   = os.environ.get("SENDGRID_API_KEY", "")
-    gmail_from     = os.environ.get("GMAIL_FROM", "")
+    resend_key     = os.environ.get("RESEND_API_KEY", "")
+    report_from    = os.environ.get("REPORT_EMAIL_FROM", "")   # e.g. luggage@nisekocluster.com (verified domain)
+    reply_to       = os.environ.get("GMAIL_FROM", "")          # optional: replies go here
     report_to_raw  = os.environ.get("REPORT_EMAIL_TO_HILTON", "")
     report_to_list = [e.strip() for e in report_to_raw.split(",") if e.strip()]
 
-    if not all([sendgrid_key, gmail_from, report_to_list]):
+    if not all([resend_key, report_from, report_to_list]):
         log.error("Daily report: one or more email env vars are missing")
         return jsonify({"error": "Email configuration incomplete"}), 500
 
@@ -414,32 +416,38 @@ def send_daily_report():
     encoded_excel  = base64.b64encode(excel_buffer.read()).decode()
 
     payload = {
-        "personalizations": [{"to": [{"email": e} for e in report_to_list]}],
-        "from": {"email": gmail_from, "name": "Hilton Niseko Village - Luggage Pick-Up"},
+        "from": f"Hilton Niseko Village - Luggage Pick-Up <{report_from}>",
+        "to": report_to_list,
         "subject": subject,
-        "content": [{"type": "text/plain", "value": body}],
+        "text": body,
         "attachments": [{
-            "content": encoded_excel,
             "filename": filename,
-            "type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            "disposition": "attachment"
-        }]
+            "content": encoded_excel,
+        }],
     }
+    if reply_to:
+        payload["reply_to"] = reply_to
 
     try:
         req = urllib.request.Request(
-            "https://api.sendgrid.com/v3/mail/send",
+            "https://api.resend.com/emails",
             data=json.dumps(payload).encode("utf-8"),
             headers={
-                "Authorization": f"Bearer {sendgrid_key}",
-                "Content-Type": "application/json"
+                "Authorization": f"Bearer {resend_key}",
+                "Content-Type": "application/json",
+                "User-Agent": "niseko-luggage/1.0",  # Resend rejects the default Python-urllib agent
             },
             method="POST"
         )
-        with urllib.request.urlopen(req) as resp:
+        with urllib.request.urlopen(req, timeout=20) as resp:
             status = resp.status
-        log.info(f"Daily report sent: {len(records)} Hilton requests for {tomorrow_str} → {report_to_list} (HTTP {status})")
+            result = json.loads(resp.read().decode() or "{}")
+        log.info(f"Daily report sent: {len(records)} Hilton requests for {tomorrow_str} → {report_to_list} (HTTP {status}, id {result.get('id')})")
         return jsonify({"sent": True, "date": tomorrow_str, "count": len(records)})
+    except urllib.error.HTTPError as e:
+        detail = e.read().decode(errors="replace")
+        log.error(f"Daily report email failed: HTTP {e.code} — {detail}")
+        return jsonify({"error": f"HTTP {e.code}", "detail": detail}), 500
     except Exception as e:
         log.error(f"Daily report email failed: {e}")
         return jsonify({"error": str(e)}), 500
