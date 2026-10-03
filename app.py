@@ -170,6 +170,7 @@ def health():
 
 # ── GET — active records ──────────────────────────────
 @app.route("/api/luggage", methods=["GET"])
+@require_admin
 def get_luggage():
     records = (
         LuggageRequest.query
@@ -207,6 +208,7 @@ def create_luggage():
 
 # ── GET — trashed records ─────────────────────────────
 @app.route("/api/luggage/trash", methods=["GET"])
+@require_admin
 def get_trash():
     records = (
         LuggageRequest.query
@@ -219,6 +221,7 @@ def get_trash():
 
 # ── POST — move to trash ──────────────────────────────
 @app.route("/api/luggage/trash", methods=["POST"])
+@require_admin
 def move_to_trash():
     ids = (request.get_json(silent=True) or {}).get("ids", [])
     if not ids:
@@ -234,6 +237,7 @@ def move_to_trash():
 
 # ── POST — restore from trash ─────────────────────────
 @app.route("/api/luggage/restore", methods=["POST"])
+@require_admin
 def restore_from_trash():
     ids = (request.get_json(silent=True) or {}).get("ids", [])
     if not ids:
@@ -249,6 +253,7 @@ def restore_from_trash():
 
 # ── DELETE — permanent delete ─────────────────────────
 @app.route("/api/luggage/permanent", methods=["DELETE"])
+@require_admin
 def perm_delete():
     ids = (request.get_json(silent=True) or {}).get("ids", [])
     if not ids:

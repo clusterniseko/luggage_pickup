@@ -1146,6 +1146,26 @@
     // Set your Railway backend URL here (no trailing slash)
     const API_URL = 'https://luggagepickup-production.up.railway.app';
 
+    // Authenticated fetch: adds the admin token and logs out if the server rejects it
+    async function authFetch(url, options = {}) {
+      const token = sessionStorage.getItem(AUTH_KEY);
+      const headers = { ...(options.headers || {}), 'Authorization': `Bearer ${token}` };
+      const res = await fetch(url, { ...options, headers });
+      if (res.status === 401) {
+        sessionExpired();
+        throw new Error('Unauthorized');
+      }
+      return res;
+    }
+
+    function sessionExpired() {
+      if (!sessionStorage.getItem(AUTH_KEY)) return;  // already logged out
+      doLogout();
+      const err = document.getElementById('loginError');
+      err.textContent = 'Your session has expired. Please sign in again.';
+      err.classList.add('show');
+    }
+
     // ── AUTH ──
     async function doLogin() {
       const user = document.getElementById('loginUser').value.trim();
@@ -1172,6 +1192,7 @@
           loadAll();
           resetInactivityTimer();
         } else {
+          err.textContent = 'Incorrect username or password.';
           err.classList.add('show');
           document.getElementById('loginPass').value = '';
           document.getElementById('loginPass').focus();
@@ -1326,12 +1347,13 @@
     async function loadAll() {
       try {
         const [recRes, trashRes] = await Promise.all([
-          fetch(`${API_URL}/api/luggage`),
-          fetch(`${API_URL}/api/luggage/trash`)
+          authFetch(`${API_URL}/api/luggage`),
+          authFetch(`${API_URL}/api/luggage/trash`)
         ]);
         _records = recRes.ok  ? await recRes.json()  : [];
         _trash   = trashRes.ok ? await trashRes.json() : [];
       } catch (e) {
+        if (e.message === 'Unauthorized') return;
         console.error('loadAll failed', e);
         _records = [];
         _trash   = [];
@@ -1343,7 +1365,7 @@
 
     // Move record(s) to trash
     async function apiMoveToTrash(ids) {
-      await fetch(`${API_URL}/api/luggage/trash`, {
+      await authFetch(`${API_URL}/api/luggage/trash`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ids })
@@ -1353,7 +1375,7 @@
 
     // Restore from trash
     async function apiRestore(ids) {
-      await fetch(`${API_URL}/api/luggage/restore`, {
+      await authFetch(`${API_URL}/api/luggage/restore`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ids })
@@ -1363,7 +1385,7 @@
 
     // Permanently delete
     async function apiPermDelete(ids) {
-      await fetch(`${API_URL}/api/luggage/permanent`, {
+      await authFetch(`${API_URL}/api/luggage/permanent`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ids })
