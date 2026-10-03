@@ -82,10 +82,15 @@ DATABASE_URL = os.environ.get("DATABASE_URL", "")
 if not DATABASE_URL:
     log.warning("DATABASE_URL not set — falling back to local SQLite")
     DATABASE_URL = "sqlite:///luggage.db"
-elif DATABASE_URL.startswith("postgres://"):
-    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+else:
+    # Force the psycopg2 driver (installed via psycopg2-binary).
+    # SQLAlchemy 2.1+ defaults "postgresql://" to psycopg v3, which is not installed.
+    for prefix in ("postgres://", "postgresql://"):
+        if DATABASE_URL.startswith(prefix):
+            DATABASE_URL = DATABASE_URL.replace(prefix, "postgresql+psycopg2://", 1)
+            break
 
-log.info(f"Using database: {DATABASE_URL[:40]}...")
+log.info(f"Using database: {DATABASE_URL.split('://')[0]} (credentials hidden)")
 
 app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URL
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
